@@ -1,0 +1,7 @@
+../source/CtlSalidas.c:31:6:CSal_Inicie	32	static
+../source/CtlSalidas.c:61:13:Es_momento	16	static
+../source/CtlSalidas.c:93:6:CSal_Procese	112	static
+../source/CtlSalidas.c:329:12:CSal_Envie_mensaje	24	static
+../source/CtlSalidas.c:336:6:CSal_Cambie_monitoreo	16	static
+../source/CtlSalidas.c:344:6:CSal_Configure_encendido	32	static
+../source/CtlSalidas.c:353:6:CSal_Configure_apagado	32	static

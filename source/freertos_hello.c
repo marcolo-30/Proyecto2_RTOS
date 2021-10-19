@@ -42,11 +42,14 @@
 #include "fsl_device_registers.h"
 #include "fsl_debug_console.h"
 #include "board.h"
+#include "CtlSalidas.h"
 
 #include "pin_mux.h"
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
+
+CSal_Control c_salidas;
 
 /* Task priorities. */
 #define hello_task_PRIORITY (configMAX_PRIORITIES - 1)
@@ -73,6 +76,11 @@ int main(void)
         while (1)
             ;
     }
+
+    if(CSal_Inicie (&c_salidas , tskIDLE_PRIORITY + 3)){
+    	PRINTF("No fue posible inicializar el modulo salidas !.\r\n");
+    };
+
     vTaskStartScheduler();
     for (;;)
         ;
