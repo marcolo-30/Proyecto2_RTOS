@@ -10,7 +10,7 @@
 //#define PUERTO
 
 
-uint32_t PIN_SALIDAS [8] = {0,4,6,7,10,11,13,16};
+uint32_t PIN_SALIDAS [8] = {16,13,11,10,7,6,4,0};
 
 #define LONG_STACK      (configMINIMAL_STACK_SIZE + 100)
 #define MAX_MENSAJES    10
