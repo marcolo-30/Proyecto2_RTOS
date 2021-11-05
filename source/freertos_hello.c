@@ -44,12 +44,14 @@
 #include "board.h"
 #include "CtlSalidas.h"
 
+
 #include "pin_mux.h"
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
 
 CSal_Control c_salidas;
+CSal_Mensaje c_sal_mensaje;
 
 /* Task priorities. */
 #define hello_task_PRIORITY (configMAX_PRIORITIES - 1)
@@ -61,6 +63,8 @@ static void hello_task(void *pvParameters);
 /*******************************************************************************
  * Code
  ******************************************************************************/
+
+
 /*!
  * @brief Application entry point.
  */
@@ -72,6 +76,7 @@ int main(void)
     BOARD_InitDebugConsole();
     if (xTaskCreate(hello_task, "Hello_task", configMINIMAL_STACK_SIZE + 10, NULL, hello_task_PRIORITY, NULL) != pdPASS)
     {
+
         PRINTF("Task creation failed!.\r\n");
         while (1)
             ;
@@ -80,9 +85,13 @@ int main(void)
     if(CSal_Inicie (&c_salidas , tskIDLE_PRIORITY + 3)){
     	PRINTF("No fue posible inicializar el modulo salidas !.\r\n");
     };
-
+    char mensaje = 0;
     vTaskStartScheduler();
-    for (;;)
+    for (;;){
+
+
+    }
+
         ;
 }
 
@@ -91,9 +100,26 @@ int main(void)
  */
 static void hello_task(void *pvParameters)
 {
+	TickType_t xLastWakeTime;
+	xLastWakeTime = xTaskGetTickCount();
+
+	const TickType_t time_pin = 1000/ portTICK_PERIOD_MS;
+	int i = 0;
     for (;;)
-    {
+    {	//c_salidas.t_cfg.on=1;
+    	c_sal_mensaje.tipo=1;
+    	c_sal_mensaje.v.forzado.salida=i;
+    	c_sal_mensaje.v.forzado.encender=1;
+
+    	CSal_Envie_mensaje(&c_salidas, &c_sal_mensaje, 0);
+
         PRINTF("Hello world.\r\n");
-        vTaskSuspend(NULL);
+
+        vTaskDelayUntil( &xLastWakeTime, time_pin );
+        i++;
+
+        if (i==8){
+        	i=0;
+        };
     }
 }

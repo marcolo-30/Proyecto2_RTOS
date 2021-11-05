@@ -1,39 +1,39 @@
-/* CtlSalidas.c   Implementaci�n del modulo de control de salidas */
-#include "MKL46Z4.h"
+/* CtlSalidas.c   Implementación del modulo de control de salidas */
+
 #include "CtlSalidas.h"
+#include "MKL46Z4.h"
+
 //#include "Comunicacion.h"
-#include "fsl_debug_console.h"
+
 //extern Com_Control c_comunicacion;
+//extern
+//#define PUERTO
 
-//#define PUERTO          P1
 
-#define LONG_STACK      (configMINIMAL_STACK_SIZE + 50)
-#define MAX_MENSAJES    32
+uint32_t PIN_SALIDAS [8] = {0,4,6,7,10,11,13,16};
 
-uint32_t PIN_SALIDAS [8] = {18U,19U,0U,4U,6U,7U,10U,11U};
-
+#define LONG_STACK      (configMINIMAL_STACK_SIZE + 100)
+#define MAX_MENSAJES    10
 
 typedef struct Salida Salida;
 #define SAL_E_ON             1
 #define SAL_E_ON_RETARDADO   2
 #define SAL_E_OFF            3
 #define SAL_E_OFF_RETARDADO  4
-
 struct Salida
    {
    char estado;
    unsigned short retardo; /* En segundos */
    };
 
-#define FACTOR_RETARDO        1
+#define FACTOR_RETARDO        60
 
-
-char CSal_Inicie (CSal_Control *cscp, 
+char CSal_Inicie (CSal_Control *cscp,
                   UBaseType_t prioridad)
    {
    char i;
    CSal_Cfg_salida *csp;
-   
+
    if ( xTaskCreate(CSal_Procese, "CtlSalida", LONG_STACK, cscp,
                     prioridad, &(cscp->tarea)) != pdPASS )
       return NO;
@@ -42,11 +42,11 @@ char CSal_Inicie (CSal_Control *cscp,
         i;
         ++ csp, --i)
       {
-	   csp->on.banderas = 0;
-	   csp->off.banderas = 0;
+      csp->on.banderas = 0;
+      csp->off.banderas = 0;
       };
-   	   cscp->modo_monitoreo = NO;
-   
+   cscp->modo_monitoreo = NO;
+
    cscp->cola_ev = xQueueCreate(MAX_MENSAJES, sizeof(CSal_Mensaje));
    if (cscp->cola_ev == NULL)
       return NO;
@@ -54,9 +54,10 @@ char CSal_Inicie (CSal_Control *cscp,
    cscp->mutex_cfg = xSemaphoreCreateMutex();
    if (cscp->mutex_cfg == NULL)
       return NO;
-      
+
    return SI;
    };
+
 
 static char Es_momento (CSal_Momento *mp,
                         Tiempo *tp)
@@ -87,7 +88,7 @@ static char Es_momento (CSal_Momento *mp,
          return NO;
       };
 
-   return NO ; /* Aquó no debe llegar */
+   return NO ; /* Aquí no debe llegar */
    };
    
 void CSal_Procese (CSal_Control *cscp)
@@ -99,16 +100,14 @@ void CSal_Procese (CSal_Control *cscp)
    char i;
    CSal_Mensaje msj;
    CSal_Cfg_salida *csp;
-  // unsigned char  bits_on,
-  //                bits_off;
+   uint32_t  bits_on,
+             bits_off;
 
-   uint32_t bits_on, bits_off;
-   unsigned char  bits_onMon,
-                  bits_offMon;
    char modo_monitoreo;
 
    /* Condicion inicial */
-   //PUERTO = 0;
+   //PUERTO = 0;    igualar puertos a 0
+
    for (sp = salidas, i = CSAL_NUM_SALIDAS; i; ++sp, --i)
       {
       sp->estado = SAL_E_OFF;
@@ -117,13 +116,10 @@ void CSal_Procese (CSal_Control *cscp)
    
    while (SI)
       {
-     if (  xQueueReceive(cscp->cola_ev, &msj, portMAX_DELAY) != pdTRUE ){
-    	 PRINTF ("CtrlSal");
-    	 continue;
-     }
+      if ( xQueueReceive(cscp->cola_ev, &msj, portMAX_DELAY) != pdTRUE )
+         continue;
 
       bits_on = bits_off = 0;
-      bits_onMon = bits_offMon = 0;
       switch (msj.tipo)
          {
          case CSAL_TMSG_EVENTO:
@@ -150,7 +146,6 @@ void CSal_Procese (CSal_Control *cscp)
                            else
                            {
                            sp->estado = SAL_E_OFF;
-                           bits_offMon |= (1 << i);
                            bits_off |= (1 << PIN_SALIDAS[i]);
                            };
                         };
@@ -170,27 +165,22 @@ void CSal_Procese (CSal_Control *cscp)
                            }
                            else
                            {
-                               if (csp->off.banderas & CSAL_B_OFF_RETARDO)
-                                    {
-                                    sp->estado = SAL_E_OFF_RETARDADO;
-                                    sp->retardo = csp->off.retardo * FACTOR_RETARDO;
-                                    }
-                                    else
-                                    sp->estado = SAL_E_ON;
-                           bits_onMon |= (1 << i);
+                           if (csp->off.banderas & CSAL_B_OFF_RETARDO)
+                              {
+                              sp->estado = SAL_E_OFF_RETARDADO;
+                              sp->retardo = csp->off.retardo * FACTOR_RETARDO;
+                              }
+                              else
+                              sp->estado = SAL_E_ON;
                            bits_on |= (1 << PIN_SALIDAS[i]);
                            };
                         };
-
-
-
                      break;
                   };
                };
             xSemaphoreGive(cscp->mutex_cfg);
-            break;
-
-         case CSAL_TMSG_FORZADO:
+			break;
+		 case CSAL_TMSG_FORZADO:
             sp = salidas + msj.v.forzado.salida;
             /* sp = &(salidas[msj.v.forzado.salida]); */
             if (msj.v.forzado.encender)
@@ -205,17 +195,15 @@ void CSal_Procese (CSal_Control *cscp)
                   else
                   sp->estado = SAL_E_ON;
                xSemaphoreGive(cscp->mutex_cfg);
-               bits_onMon |= (1 << msj.v.forzado.salida);
                bits_on |= (1 << PIN_SALIDAS[msj.v.forzado.salida]);
                }
                else
                { /* Se apaga */
                sp->estado = SAL_E_OFF;
-               bits_offMon |= (1 << msj.v.forzado.salida);
                bits_off |= (1 << PIN_SALIDAS[msj.v.forzado.salida]);
                };
-            break;
-         case CSAL_TMSG_RTC: // cambia el minuto
+			break;
+		 case CSAL_TMSG_RTC:
             xSemaphoreTake(cscp->mutex_cfg, portMAX_DELAY);
             for (csp = cscp->t_cfg, sp = salidas, i =  0;
                  i < CSAL_NUM_SALIDAS;
@@ -229,7 +217,6 @@ void CSal_Procese (CSal_Control *cscp)
                           Es_momento(&(csp->off.m), &(msj.v.tiempo)) )
                         {
                         sp->estado = SAL_E_OFF;
-                        bits_offMon |= (1 << i);
                         bits_off |= (1 << PIN_SALIDAS[i]);
                         };
                      break;
@@ -245,15 +232,14 @@ void CSal_Procese (CSal_Control *cscp)
                            }
                            else
                            sp->estado = SAL_E_ON;
-                        bits_onMon |= (1 << i);
                         bits_on |= (1 << PIN_SALIDAS[i]);
                         };
                      break;
                   };
                };
             xSemaphoreGive(cscp->mutex_cfg);
-            break;
-         case CSAL_TMSG_PERIODO: // Enviar cada segundo.
+			break;
+		 case CSAL_TMSG_PERIODO:
             xSemaphoreTake(cscp->mutex_cfg, portMAX_DELAY);
             for (csp = cscp->t_cfg, sp = salidas, i =  0;
                  i < CSAL_NUM_SALIDAS;
@@ -266,8 +252,7 @@ void CSal_Procese (CSal_Control *cscp)
                      if ( !(sp->retardo) )
                         {
                         sp->estado = SAL_E_OFF;
-                        bits_offMon |= (1 << i);
-                        bits_off |= (1 <<PIN_SALIDAS[i]);
+                        bits_off |= (1 << PIN_SALIDAS[i]);
                         };
                      break;
                   case SAL_E_ON_RETARDADO:
@@ -281,7 +266,6 @@ void CSal_Procese (CSal_Control *cscp)
                            }
                            else
                            sp->estado = SAL_E_ON;
-                        bits_onMon |= (1 << i);
                         bits_on |= (1 << PIN_SALIDAS[i]);
                         };
                      break;
@@ -289,12 +273,12 @@ void CSal_Procese (CSal_Control *cscp)
                };
             xSemaphoreGive(cscp->mutex_cfg);
             break;
-         };
+		 };
          
       /* Enciende o apaga bits */
-      //PUERTO = (PUERTO & ~bits_off) | bits_on;
-      GPIOB->PSOR = bits_on; /*Set Logic 1*/
-	  GPIOB->PCOR = bits_off; /*Set Logic 0*/
+      //PUERTO = (PUERTO & ~bits_off) | bits_on;   Manejo de puertos
+      PTC->PSOR = bits_on; /*Set Logic 1*/
+      PTC->PCOR = bits_off; /*Set Logic 0*/
 
       xSemaphoreTake(cscp->mutex_cfg, portMAX_DELAY);
       modo_monitoreo = cscp->modo_monitoreo;
@@ -309,13 +293,13 @@ void CSal_Procese (CSal_Control *cscp)
          txt[4] = '\0';
          for (i =  0; i < CSAL_NUM_SALIDAS; ++i)
             {
-            if (bits_onMon & (1 << i))
+            if (bits_on & (1 << i))
                {
                txt[1] = '0' + i;
                txt[2] = '1';
                //Com_Tx_texto(&c_comunicacion, txt, portMAX_DELAY);
                };
-            if (bits_offMon & (1 << i))
+            if (bits_off & (1 << i))
                {
                txt[1] = '0' + i;
                txt[2] = '0';
@@ -327,10 +311,10 @@ void CSal_Procese (CSal_Control *cscp)
    };
 
 BaseType_t CSal_Envie_mensaje (CSal_Control *cscp,
-                               CSal_Mensaje *msga,
+                               CSal_Mensaje *msg,
                                TickType_t espera)
    {
-   return xQueueSend(cscp->cola_ev, msga, espera);
+   return xQueueSend(cscp->cola_ev, msg, espera);
    };
 
 void CSal_Cambie_monitoreo (CSal_Control *cscp, 
@@ -357,4 +341,5 @@ void CSal_Configure_apagado (CSal_Control *cscp,
    xSemaphoreTake(cscp->mutex_cfg, portMAX_DELAY);
    cscp->t_cfg[salida].off = *off;
    xSemaphoreGive(cscp->mutex_cfg);
+
    };

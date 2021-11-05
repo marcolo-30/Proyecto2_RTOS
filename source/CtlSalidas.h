@@ -2,11 +2,13 @@
 #if !defined(CTLSALIDAS_H)
 
 #define CTLSALIDAS_H
+
 #include "FreeRTOS.h"
 #include "queue.h"
 #include "semphr.h"
 #include "task.h"
 #include "Varios.h"
+#include "portmacro.h"
 
 #define CSAL_NUM_SALIDAS        8
 
