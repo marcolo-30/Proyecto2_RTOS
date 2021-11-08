@@ -53,22 +53,57 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 
 		switch (mensaje.msg[0]){
 
-			case'S':
-				//c_salidas.t_cfg.on=1;
-				c_sal_mensaje.tipo=1;
-				c_sal_mensaje.v.forzado.salida=1;
-				c_sal_mensaje.v.forzado.encender=1;
-
-				CSal_Envie_mensaje(&c_salidas, &c_sal_mensaje, 0);
-
 			case'E':
 
-				//c_salidas.t_cfg.on=1;
-				c_sal_mensaje.tipo=1;
-				c_sal_mensaje.v.forzado.salida=5;
-				c_sal_mensaje.v.forzado.encender=1;
+				switch(mensaje.msg[1]){
+					case 'E':
+						//c_salidas.t_cfg.on=1;
+										c_sal_mensaje.tipo=1;
+										c_sal_mensaje.v.forzado.salida=0;
+										c_sal_mensaje.v.forzado.encender=1;
 
-				CSal_Envie_mensaje(&c_salidas, &c_sal_mensaje, 0);
+										CSal_Envie_mensaje(&c_salidas, &c_sal_mensaje, 0);
+										break;
+					case 'A':
+						//c_salidas.t_cfg.on=1;
+										c_sal_mensaje.tipo=1;
+										c_sal_mensaje.v.forzado.salida=1;
+										c_sal_mensaje.v.forzado.encender=1;
+
+										CSal_Envie_mensaje(&c_salidas, &c_sal_mensaje, 0);
+										break;
+					default:
+					break;
+
+				}
+				break;
+
+			case'S':
+
+				switch(mensaje.msg[1]){
+									case 'E':
+										//c_salidas.t_cfg.on=1;
+														c_sal_mensaje.tipo=1;
+														c_sal_mensaje.v.forzado.salida=2;
+														c_sal_mensaje.v.forzado.encender=1;
+
+														CSal_Envie_mensaje(&c_salidas, &c_sal_mensaje, 0);
+														break;
+									case 'A':
+										//c_salidas.t_cfg.on=1;
+														c_sal_mensaje.tipo=1;
+														c_sal_mensaje.v.forzado.salida=3;
+														c_sal_mensaje.v.forzado.encender=1;
+
+														CSal_Envie_mensaje(&c_salidas, &c_sal_mensaje, 0);
+														break;
+									default:
+									break;
+
+								}
+
+				break;
+
 			default:
 				break;
 		};

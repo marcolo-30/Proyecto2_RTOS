@@ -180,14 +180,6 @@ int main(void)
         	PRINTF("No fue posible inicializar el modulo salidas !.\r\n");
         };
 
-    if (xTaskCreate(comRxUart_task, "Com_task", configMINIMAL_STACK_SIZE + 10, NULL, comRxUart_task_PRIORITY, NULL) != pdPASS)
-        {
-
-            PRINTF("Task creation failed!.\r\n");
-            while (1)
-                ;
-        }
-
 
     ColaRx = xQueueCreate( 64, sizeof(char));
     if(ColaRx==NULL){
@@ -262,7 +254,8 @@ static void hello_task(void *pvParameters)
 
 
 
-    	//inter_mensaje.msg[0]='S';
+    	inter_mensaje.msg[0]='E';
+    	inter_mensaje.msg[1]='E';
 
 
     	InterCom_Envie_mensaje(&inter_cont,&inter_mensaje,0);
