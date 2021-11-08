@@ -43,6 +43,7 @@
 #include "fsl_debug_console.h"
 #include "board.h"
 #include "CtlSalidas.h"
+#include "Interprete.h"
 
 /* UART import for Interrupts. */
 #include "fsl_uart.h"
@@ -58,21 +59,41 @@
 #define PROJ_UART_IRQn UART1_IRQn
 #define PROJ_UART_IRQHandler UART1_IRQHandler
 
+
 CSal_Control c_salidas;
 CSal_Mensaje c_sal_mensaje;
+Interprete_Control inter_cont;
+Interprete_mensaje inter_mensaje;
+
 char dato_rx;
 /* Task priorities. */
 #define hello_task_PRIORITY (configMAX_PRIORITIES - 1)
+
+#define comRxUart_task_PRIORITY (configMAX_PRIORITIES - 2)
+
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
 static void hello_task(void *pvParameters);
+static void comRxUart_task(void *pvParameters);
 
 /*******************************************************************************
  * Variables
  ******************************************************************************/
 uint8_t g_tipString[] =
     "Proyect 2 RTOS\r\n";
+
+uint8_t pmesage[] =
+    "Hola \r\n";
+
+
+QueueHandle_t ColaRx;
+int mensaje_completo = NO;
+
+
+
+
+
 /*******************************************************************************
  * Code
  ******************************************************************************/
@@ -82,6 +103,13 @@ void PROJ_UART_IRQHandler(void) {
     if ((kUART_RxDataRegFullFlag | kUART_RxOverrunFlag) & UART_GetStatusFlags(PROJ_UART)){
 			dato_rx = UART1->D; // Recepcion del dato
 			UART_WriteBlocking(PROJ_UART, &dato_rx, 1);
+			if(dato_rx != 'n'){
+				xQueueSendFromISR(ColaRx , ( void * ) &dato_rx,&xHigherPriorityTaskWoken);
+			}
+			else{
+
+				mensaje_completo = SI;
+			}
 	}
 	else{
 
@@ -134,6 +162,7 @@ int main(void)
     //UART_EnableInterrupts(PROJ_UART, kUART_TxDataRegEmptyInterruptEnable );
     EnableIRQ(PROJ_UART_IRQn);
 
+    //interp_contp->cola_com = xQueueCreate(MAX_MENSAJES, sizeof(Interprete_mensaje));
 
     if (xTaskCreate(hello_task, "Hello_task", configMINIMAL_STACK_SIZE + 10, NULL, hello_task_PRIORITY, NULL) != pdPASS)
     {
@@ -146,6 +175,25 @@ int main(void)
     if(CSal_Inicie (&c_salidas , tskIDLE_PRIORITY + 3)){
     	PRINTF("No fue posible inicializar el modulo salidas !.\r\n");
     };
+
+    if(Interprete_Inicie (&inter_cont,tskIDLE_PRIORITY + 2)){
+        	PRINTF("No fue posible inicializar el modulo salidas !.\r\n");
+        };
+
+    if (xTaskCreate(comRxUart_task, "Com_task", configMINIMAL_STACK_SIZE + 10, NULL, comRxUart_task_PRIORITY, NULL) != pdPASS)
+        {
+
+            PRINTF("Task creation failed!.\r\n");
+            while (1)
+                ;
+        }
+
+
+    ColaRx = xQueueCreate( 64, sizeof(char));
+    if(ColaRx==NULL){
+    	while(1);
+    };
+
     vTaskStartScheduler();
     for (;;){
 
@@ -158,6 +206,32 @@ int main(void)
 /*!
  * @brief Task responsible for printing of "Hello world." message.
  */
+
+static void comRxUart_task(void *pvParameters){
+
+	char comando[25];
+	int i=0;
+
+	for (;;)
+	    {
+		 if(mensaje_completo==SI){
+
+			 while (!uxQueueMessagesWaiting( ColaRx )){
+
+				 xQueueReceive(ColaRx,&comando[i],0);
+				 i++;
+
+			  }
+
+			 InterCom_Envie_mensaje(&inter_cont,&comando,0);
+			 mensaje_completo==NO;
+			 i=0;
+		 }
+
+
+	    }
+}
+
 static void hello_task(void *pvParameters)
 {
 	TickType_t xLastWakeTime;
@@ -165,13 +239,15 @@ static void hello_task(void *pvParameters)
 
 	const TickType_t time_pin = 1000/ portTICK_PERIOD_MS;
 	int i = 0;
+
     for (;;)
-    {	//c_salidas.t_cfg.on=1;
+    {/*	//c_salidas.t_cfg.on=1;
     	c_sal_mensaje.tipo=1;
     	c_sal_mensaje.v.forzado.salida=i;
     	c_sal_mensaje.v.forzado.encender=1;
 
     	CSal_Envie_mensaje(&c_salidas, &c_sal_mensaje, 0);
+
 
         //PRINTF("Hello world.\r\n");
 
@@ -180,7 +256,20 @@ static void hello_task(void *pvParameters)
 
         if (i==8){
         	i=0;
-        };
+        };*/
+
+
+
+
+
+    	//inter_mensaje.msg[0]='S';
+
+
+    	InterCom_Envie_mensaje(&inter_cont,&inter_mensaje,0);
+    	vTaskDelayUntil( &xLastWakeTime, time_pin );
+
+
+
     }
 }
 

@@ -32,25 +32,25 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: proyect2_freertos_hello.axf
+all: Proyecto2_RTOS.axf
 
 # Tool invocations
-proyect2_freertos_hello.axf: $(OBJS) $(USER_OBJS)
+Proyecto2_RTOS.axf: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: MCU Linker'
-	arm-none-eabi-gcc -nostdlib -Xlinker -Map="proyect2_freertos_hello.map" -Xlinker --gc-sections -Xlinker -print-memory-usage -Xlinker --sort-section=alignment -Xlinker --cref -mcpu=cortex-m0plus -mthumb -T proyect2_freertos_hello_Debug.ld -o "proyect2_freertos_hello.axf" $(OBJS) $(USER_OBJS) $(LIBS)
+	arm-none-eabi-gcc -nostdlib -Xlinker -Map="Proyecto2_RTOS.map" -Xlinker --gc-sections -Xlinker -print-memory-usage -Xlinker --sort-section=alignment -Xlinker --cref -mcpu=cortex-m0plus -mthumb -T proyect2_freertos_hello_Debug.ld -o "Proyecto2_RTOS.axf" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 	$(MAKE) --no-print-directory post-build
 
 # Other Targets
 clean:
-	-$(RM) $(EXECUTABLES)$(OBJS)$(C_DEPS) proyect2_freertos_hello.axf
+	-$(RM) $(EXECUTABLES)$(OBJS)$(C_DEPS) Proyecto2_RTOS.axf
 	-@echo ' '
 
 post-build:
 	-@echo 'Performing post-build steps'
-	-arm-none-eabi-size "proyect2_freertos_hello.axf"; # arm-none-eabi-objcopy -v -O binary "proyect2_freertos_hello.axf" "proyect2_freertos_hello.bin" ; # checksum -p MKL46Z256xxx4 -d "proyect2_freertos_hello.bin";
+	-arm-none-eabi-size "Proyecto2_RTOS.axf"; # arm-none-eabi-objcopy -v -O binary "Proyecto2_RTOS.axf" "Proyecto2_RTOS.bin" ; # checksum -p MKL46Z256xxx4 -d "Proyecto2_RTOS.bin";
 	-@echo ' '
 
 .PHONY: all clean dependents post-build

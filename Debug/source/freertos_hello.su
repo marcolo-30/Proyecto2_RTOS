@@ -1,5 +1,6 @@
-C:\Users\User\Documents\Maestria Iot\Semestre 2021-2\RTOS\Entrega2\Proyecto2_RTOS\CMSIS/core_cm0plus.h:733:22:__NVIC_EnableIRQ	16	static
-C:\Users\User\Documents\Maestria Iot\Semestre 2021-2\RTOS\Entrega2\Proyecto2_RTOS\drivers/fsl_common.h:405:28:EnableIRQ	16	static
-../source/freertos_hello.c:79:6:UART1_IRQHandler	16	static
-../source/freertos_hello.c:105:5:main	32	static
-../source/freertos_hello.c:161:13:hello_task	32	static
+C:\Users\Maloa\Documents\MCUXpressoIDE_11.4.0_6224\workspace\Proyecto2\Proyecto2_RTOS\CMSIS/core_cm0plus.h:733:22:__NVIC_EnableIRQ	16	static
+C:\Users\Maloa\Documents\MCUXpressoIDE_11.4.0_6224\workspace\Proyecto2\Proyecto2_RTOS\drivers/fsl_common.h:405:28:EnableIRQ	16	static
+../source/freertos_hello.c:100:6:UART1_IRQHandler	16	static
+../source/freertos_hello.c:133:5:main	32	static
+../source/freertos_hello.c:210:13:comRxUart_task	48	static
+../source/freertos_hello.c:235:13:hello_task	32	static
