@@ -57,13 +57,20 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 
 				switch(mensaje.msg[1]){
 					case 'E':
-						//c_salidas.t_cfg.on=1;
-										c_sal_mensaje.tipo=1;
-										c_sal_mensaje.v.forzado.salida=0;
-										c_sal_mensaje.v.forzado.encender=1;
 
-										CSal_Envie_mensaje(&c_salidas, &c_sal_mensaje, 0);
-										break;
+
+
+							c_sal_mensaje.tipo=1;
+							c_sal_mensaje.v.forzado.salida=0;
+							c_sal_mensaje.v.forzado.encender=k;
+							CSal_Envie_mensaje(&c_salidas, &c_sal_mensaje, 0);
+
+
+							//c_salidas.t_cfg.on=1;
+
+
+
+					break;
 					case 'A':
 						//c_salidas.t_cfg.on=1;
 										c_sal_mensaje.tipo=1;
@@ -82,14 +89,43 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 
 				switch(mensaje.msg[1]){
 									case 'E':
-										//c_salidas.t_cfg.on=1;
-														c_sal_mensaje.tipo=1;
-														c_sal_mensaje.v.forzado.salida=2;
-														c_sal_mensaje.v.forzado.encender=1;
+										i=3;
+										while(mensaje.msg[i] != 110){ //110 corresponde a n en ascci
+											switch(mensaje.msg[i]){
+											case 'E':
 
-														CSal_Envie_mensaje(&c_salidas, &c_sal_mensaje, 0);
-														break;
+												j=i+2;
+												k=0;
+												while(mensaje.msg[j]!=59){
+														ret[k]=mensaje.msg[j];c_sal_mensaje.tipo=1;
+														j++;k++;
+												}
+												inter_Enc.e.retardo = atoi(ret);
+												i=j+1;
+												break;
+
+											case 'F':
+
+												c_sal_mensaje.tipo=1;
+												c_sal_mensaje.v.forzado.salida=i;
+												c_sal_mensaje.v.forzado.encender=1;
+												CSal_Envie_mensaje(&c_salidas, &c_sal_mensaje, 0);
+												i++;
+												break;
+											default:
+												i++;
+
+
+
+											}
+
+
+										}
+										break;
+										//c_salidas.t_cfg.on=1;
+
 									case 'A':
+										i=3;
 										//c_salidas.t_cfg.on=1;
 														c_sal_mensaje.tipo=1;
 														c_sal_mensaje.v.forzado.salida=3;
@@ -98,11 +134,25 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 														CSal_Envie_mensaje(&c_salidas, &c_sal_mensaje, 0);
 														break;
 									default:
+										i++;
 									break;
 
 								}
 
 				break;
+
+			case'M':
+
+				switch(mensaje.msg[3]){             //Activo o inactivo
+
+				                case 'A':
+				                    CSal_Cambie_monitoreo(&c_salidas, SI);
+				                    break;
+				                case 'I':
+				                    CSal_Cambie_monitoreo(&c_salidas, NO);
+				                    break;
+						};
+				 break;
 
 			default:
 				break;

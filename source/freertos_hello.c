@@ -254,8 +254,19 @@ static void hello_task(void *pvParameters)
 
 
 
-    	inter_mensaje.msg[0]='E';
+    	inter_mensaje.msg[0]='S';
     	inter_mensaje.msg[1]='E';
+    	inter_mensaje.msg[2]='1';
+    	inter_mensaje.msg[3]='F';
+    	inter_mensaje.msg[4]='1';
+    	inter_mensaje.msg[5]=';';
+    	inter_mensaje.msg[6]='E';
+    	inter_mensaje.msg[7]='1';
+    	inter_mensaje.msg[8]='1';
+    	inter_mensaje.msg[9]=';';
+    	inter_mensaje.msg[10]='n';
+    	inter_mensaje.msg[11]=';';
+    	inter_mensaje.msg[12]='n';
 
 
     	InterCom_Envie_mensaje(&inter_cont,&inter_mensaje,0);
