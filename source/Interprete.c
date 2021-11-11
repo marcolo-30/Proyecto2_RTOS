@@ -20,9 +20,6 @@ CSal_Apagado   inter_Apa;
 Interprete_mensaje mensaje;
 
 
-
-
-
 char Interprete_Inicie (Interprete_Control *interp_contp, UBaseType_t prioridad){
 
 	   if ( xTaskCreate( Interprete_Procese, "Interprete", LONG_STACK, interp_contp,

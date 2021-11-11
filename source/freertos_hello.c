@@ -42,13 +42,19 @@
 #include "fsl_device_registers.h"
 #include "fsl_debug_console.h"
 #include "board.h"
+
+/* Custom Libraries. */
 #include "CtlSalidas.h"
 #include "Interprete.h"
+#include "Keyboard.h"
+#include "lcd.h"
+#include "Interfaz.h"
 
 /* UART import for Interrupts. */
 #include "fsl_uart.h"
-
 #include "pin_mux.h"
+
+
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -59,16 +65,19 @@
 #define PROJ_UART_IRQn UART1_IRQn
 #define PROJ_UART_IRQHandler UART1_IRQHandler
 
-
+/*******************************************************************************
+* Handlers
+******************************************************************************/
 CSal_Control c_salidas;
 CSal_Mensaje c_sal_mensaje;
 Interprete_Control inter_cont;
 Interprete_mensaje inter_mensaje;
-
-char dato_rx;
-/* Task priorities. */
+Keyboard_Control c_keyboard;
+Interfaz_Control c_interfaz;
+/*******************************************************************************
+* Task Priorities
+******************************************************************************/
 #define hello_task_PRIORITY (configMAX_PRIORITIES - 1)
-
 #define comRxUart_task_PRIORITY (configMAX_PRIORITIES - 2)
 
 /*******************************************************************************
@@ -86,31 +95,48 @@ uint8_t g_tipString[] =
 uint8_t pmesage[] =
     "Hola \r\n";
 
-
 QueueHandle_t ColaRx;
+QueueHandle_t ColaKeyboard;
+QueueHandle_t ColaTx;
+QueueHandle_t ColaInterfaz;
+
+
+char dato_rx;
 int mensaje_completo = NO;
-
-
-
-
+char TX_texto[5];
 
 /*******************************************************************************
- * Code
- ******************************************************************************/
+* UART interrupt
+******************************************************************************/
 void PROJ_UART_IRQHandler(void) {
 	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 	// si es una interruption de recepción
     if ((kUART_RxDataRegFullFlag | kUART_RxOverrunFlag) & UART_GetStatusFlags(PROJ_UART)){
 			dato_rx = UART1->D; // Recepcion del dato
 			UART_WriteBlocking(PROJ_UART, &dato_rx, 1);
-			if(dato_rx != 'n'){
-				xQueueSendFromISR(ColaRx , ( void * ) &dato_rx,&xHigherPriorityTaskWoken);
-			}
-			else{
+//			if(dato_rx != 'n'){
+//				xQueueSendFromISR(ColaRx , ( void * ) &dato_rx,&xHigherPriorityTaskWoken);
+//			}
+//
+//			else{
+//
+//				mensaje_completo = SI;
+//			}
 
-				mensaje_completo = SI;
-			}
+
 	}
+
+    else if((kUART_TxDataRegEmptyFlag) & UART_GetStatusFlags(PROJ_UART) ){
+
+    	   if ( xQueueReceiveFromISR(ColaTx, &TX_texto, 0) == pdTRUE ){
+    		   uint8_t *data = TX_texto;
+
+    		        UART1->D = *(data);
+
+
+
+    	   }
+
 	else{
 
 		   UART_DisableInterrupts(PROJ_UART, kUART_TxDataRegEmptyInterruptEnable );
@@ -124,20 +150,24 @@ void PROJ_UART_IRQHandler(void) {
     __DSB();
   #endif
 }
+}
 
+/*******************************************************************************
+* Main Code
+******************************************************************************/
 
-
-/*!
- * @brief Application entry point.
- */
 int main(void)
 {
-	//Confing UART
-	 uart_config_t config;
-    /* Init board hardware. */
-    BOARD_InitPins();
+
+	uart_config_t config;
+	BOARD_InitPins();
     BOARD_BootClockRUN();
     BOARD_InitDebugConsole();
+
+    /*******************************************************************************
+    * Uart Interrupt Initilization
+    ******************************************************************************/
+
     /*
         * config.baudRate_Bps = 115200U;
         * config.parityMode = kUART_ParityDisabled;
@@ -146,42 +176,52 @@ int main(void)
         * config.rxFifoWatermark = 1;
         * config.enableTx = false;
         * config.enableRx = false;
-        */
+    */
+
     UART_GetDefaultConfig(&config);
     config.baudRate_Bps = BOARD_DEBUG_UART_BAUDRATE;
     config.enableTx = true;
     config.enableRx = true;
-
-
     UART_Init(PROJ_UART, &config, PROJ_UART_CLK_FREQ);
-
     UART_WriteBlocking(PROJ_UART, g_tipString, sizeof(g_tipString) / sizeof(g_tipString[0]));
-    /* Enable RX interrupt. */
     UART_EnableInterrupts(PROJ_UART, kUART_RxDataRegFullInterruptEnable | kUART_RxOverrunInterruptEnable | kUART_TxDataRegEmptyInterruptEnable );
-    /* Enable TX interrupt. */
-    //UART_EnableInterrupts(PROJ_UART, kUART_TxDataRegEmptyInterruptEnable );
     EnableIRQ(PROJ_UART_IRQn);
 
     //interp_contp->cola_com = xQueueCreate(MAX_MENSAJES, sizeof(Interprete_mensaje));
 
+    /*******************************************************************************
+    * Task Initialization
+    ******************************************************************************/
+
     if (xTaskCreate(hello_task, "Hello_task", configMINIMAL_STACK_SIZE + 10, NULL, hello_task_PRIORITY, NULL) != pdPASS)
     {
-
         PRINTF("Task creation failed!.\r\n");
-        while (1)
-            ;
+        while (1);
     }
+
+    if (xTaskCreate(comRxUart_task, "comRxUart_task", configMINIMAL_STACK_SIZE + 10, NULL, comRxUart_task_PRIORITY, NULL) != pdPASS)
+    {
+        PRINTF("Task creation failed!.\r\n");
+        while (1);
+    }
+    Interfaz_Inicie(&c_interfaz,  tskIDLE_PRIORITY + 3);
+
+    Keyboard_Inicie(&c_keyboard,  tskIDLE_PRIORITY + 4);
 
     if(CSal_Inicie (&c_salidas , tskIDLE_PRIORITY + 3)){
     	PRINTF("No fue posible inicializar el modulo salidas !.\r\n");
     };
 
     if(Interprete_Inicie (&inter_cont,tskIDLE_PRIORITY + 2)){
-        	PRINTF("No fue posible inicializar el modulo salidas !.\r\n");
-        };
+        	PRINTF("No fue posible inicializar el interprete de comandos !.\r\n");
+    };
 
 
     ColaRx = xQueueCreate( 64, sizeof(char));
+    ColaKeyboard = xQueueCreate( 64, sizeof(char));
+    ColaTx = xQueueCreate( 64, sizeof(char));
+    ColaInterfaz = xQueueCreate( 10, sizeof(char));
+
     if(ColaRx==NULL){
     	while(1);
     };
@@ -189,10 +229,7 @@ int main(void)
     vTaskStartScheduler();
     for (;;){
 
-
-    }
-
-        ;
+    };
 }
 
 /*!
@@ -204,21 +241,30 @@ static void comRxUart_task(void *pvParameters){
 	char comando[25];
 	int i=0;
 
+	uint8_t keyboard_data = 'a';
+
 	for (;;)
 	    {
-		 if(mensaje_completo==SI){
 
-			 while (!uxQueueMessagesWaiting( ColaRx )){
-
-				 xQueueReceive(ColaRx,&comando[i],0);
-				 i++;
-
-			  }
-
-			 InterCom_Envie_mensaje(&inter_cont,&comando,0);
-			 mensaje_completo==NO;
-			 i=0;
-		 }
+		if(uxQueueMessagesWaiting(ColaKeyboard)){
+			xQueueReceive(ColaKeyboard,&keyboard_data,0);
+			xQueueSend(ColaTx,(void *)&keyboard_data,0);
+			UART_EnableInterrupts(PROJ_UART, kUART_TxDataRegEmptyInterruptEnable );
+			//UART_WriteBlocking(PROJ_UART, &keyboard_data, 1);
+		}
+//		 if(mensaje_completo==SI){
+//
+//			 while (!uxQueueMessagesWaiting( ColaRx )){
+//
+//				 xQueueReceive(ColaRx,&comando[i],0);
+//				 i++;
+//
+//			  }
+//
+//			 InterCom_Envie_mensaje(&inter_cont,&comando,0);
+//			 mensaje_completo==NO;
+//			 i=0;
+//		 }
 
 
 	    }
