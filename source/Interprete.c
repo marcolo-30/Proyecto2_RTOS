@@ -66,109 +66,318 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 //			}
 		 if(uxQueueMessagesWaiting(interp_contp->cola_com)){
 
-	       xQueueReceive(interp_contp->cola_com, &mensaje, 0);
-
-
-
+			xQueueReceive(interp_contp->cola_com, &mensaje, portMAX_DELAY);
 			switch (mensaje.msg[0]){
 
-
-				case'E':
-					switch(mensaje.msg[1]){
 						case 'E':
-								c_sal_mensaje.tipo=1;
-								c_sal_mensaje.v.forzado.salida=0;
-								c_sal_mensaje.v.forzado.encender=k;
-								CSal_Envie_mensaje(&c_salidas, &c_sal_mensaje, 0);
-								//c_salidas.t_cfg.on=1;
-						break;
 
-						case 'G':
+							switch(mensaje.msg[1]){
+								case 'E':
 
-				        	GPIO_WritePinOutput(GPIOC,BOARD_INITPINS_S6_PIN,1);
-				        	vTaskDelay( oneSecond );
-				        	GPIO_WritePinOutput(GPIOC,BOARD_INITPINS_S6_PIN,0);
-				        	vTaskDelay( oneSecond );
-						break;
+										c_sal_mensaje.tipo=1;
+										c_sal_mensaje.v.forzado.salida=0;
+										c_sal_mensaje.v.forzado.encender=k;
+										CSal_Envie_mensaje(&c_salidas, &c_sal_mensaje, 0);
 
-						case 'A':
-							//c_salidas.t_cfg.on=1;
-											c_sal_mensaje.tipo=1;
-											c_sal_mensaje.v.forzado.salida=1;
-											c_sal_mensaje.v.forzado.encender=1;
-											CSal_Envie_mensaje(&c_salidas, &c_sal_mensaje, 0);
-											break;
-						default:
-						break;
-					}
-					break;
+										//c_salidas.t_cfg.on=1;
 
-				case'S':
-
-					switch(mensaje.msg[1]){
-										case 'E':
-											i=3;
-											while(mensaje.msg[i] != 110){ //110 corresponde a n en ascci
-												switch(mensaje.msg[i]){
-												case 'E':
-													j=i+2;
-													k=0;
-													while(mensaje.msg[j]!=59){
-															ret[k]=mensaje.msg[j];c_sal_mensaje.tipo=1;
-															j++;k++;
-													}
-													inter_Enc.e.retardo = atoi(ret);
-													i=j+1;
-													break;
-
-												case 'F':
+								break;
+								case 'A':
+									//c_salidas.t_cfg.on=1;
 													c_sal_mensaje.tipo=1;
-													c_sal_mensaje.v.forzado.salida=i;
+													c_sal_mensaje.v.forzado.salida=1;
 													c_sal_mensaje.v.forzado.encender=1;
+
 													CSal_Envie_mensaje(&c_salidas, &c_sal_mensaje, 0);
-													i++;
 													break;
-												default:
-													i++;
-												}
+								default:
+								break;
 
-											}
-											break;
-											//c_salidas.t_cfg.on=1;
+							}
+							break;
 
-										case 'A':
-											i=3;
-											//c_salidas.t_cfg.on=1;
-															c_sal_mensaje.tipo=1;
-															c_sal_mensaje.v.forzado.salida=3;
-															c_sal_mensaje.v.forzado.encender=1;
-															CSal_Envie_mensaje(&c_salidas, &c_sal_mensaje, 0);
-															break;
-										default:
-											i++;
-										break;
+						case 'S':
+							switch(mensaje.msg[1]){
+												case 'E':
+													i=3;
+													while(mensaje.msg[i] != 110){ //110 corresponde a n en ascci
+														switch(mensaje.msg[i]){
+															case 'E':
 
-									}
-					break;
+																j=i+2;
+																k=0;
+																inter_Enc.banderas  |=   CSAL_B_ON_EVENTO;
+																inter_Enc.e.entrada = mensaje.msg [i+1] ;
 
-				case'M':
-					switch(mensaje.msg[3]){             //Activo o inactivo
-					                case 'A':
-					                    CSal_Cambie_monitoreo(&c_salidas, SI);
-					                    break;
-					                case 'I':
-					                    CSal_Cambie_monitoreo(&c_salidas, NO);
-					                    break;
-							};
-					 break;
+																while(mensaje.msg[j]!=59){ // 59 corresponde a ;
+																		ret[k]=mensaje.msg[j];
+																		j++;k++;
+																}
+																inter_Enc.e.retardo = atoi(ret);
 
-				default:
-					break;
-				};
+																i=j+1;
+
+																break;
+
+															case 'F':
+
+																 inter_Enc.banderas  |=   CSAL_B_ON_MOMENTO;
+																 j=i+1;
+
+																 while(mensaje.msg[j]!=59){
+
+																	 switch(mensaje.msg[j]){
+
+																	 	case 'A':
+
+									                                        inter_Enc.m.tipo = CSAL_TP_M_ANIO;
+									                                        num[0]=mensaje.msg[j+2];
+									                                        num[1]=mensaje.msg[j+3];
+									                                        inter_Enc.m.t.f.mes =atoi(num);
+									                                        num[0]=mensaje.msg[j+4];
+									                                        num[1]=mensaje.msg[j+5];
+									                                        inter_Enc.m.t.f.dia = atoi(num);
+									                                        num[0]=mensaje.msg[j+6];
+									                                        num[1]=mensaje.msg[j+7];
+									                                        inter_Enc.m.t.h.hora = atoi(num);
+									                                        num[0]=mensaje.msg[j+8];
+									                                        num[1]=mensaje.msg[j+9];
+									                                        inter_Enc.m.t.h.minuto = atoi(num);
+									                                        j=j+9;
+									                                        i=j;
+																	 		break;
+
+																	 	case'M':
+
+																			inter_Enc.m.tipo = CSAL_TP_M_MES;
+																			num[0]=mensaje.msg[j+2];
+																			num[1]=mensaje.msg[j+3];
+																			inter_Enc.m.t.f.dia = atoi(num);
+																			num[0]=mensaje.msg[j+4];
+																			num[1]=mensaje.msg[j+5];
+																			inter_Enc.m.t.h.hora = atoi(num);
+																			num[0]=mensaje.msg[j+6];
+																			num[1]=mensaje.msg[j+7];
+																			inter_Enc.m.t.h.minuto = atoi(num);
+																			j=j+7;
+																			i=j;
+																	 		break;
+
+																	 	case 'S':
+
+									                                        inter_Enc.m.tipo = CSAL_TP_M_SEMANA;
+									                                        num[0]=0;
+									                                        num[1]=mensaje.msg[j+2];
+									                                        inter_Enc.m.t.s = atoi(num);
+									                                        num[0]=mensaje.msg[j+3];
+									                                        num[1]=mensaje.msg[j+4];
+									                                        inter_Enc.m.t.h.hora = atoi(num);
+									                                        num[0]=mensaje.msg[j+5];
+									                                        num[1]=mensaje.msg[j+6];
+									                                        inter_Enc.m.t.h.minuto = atoi(num);
+									                                        j=j+6;
+									                                        i=j;
+
+																	 		break;
+
+																	 	case'D':
+																	 		inter_Enc.m.tipo = CSAL_TP_M_DIA;
+																			num[0]=mensaje.msg[j+2];
+																			num[1]=mensaje.msg[j+3];
+																			inter_Enc.m.t.h.hora = atoi(num);
+																			num[0]=mensaje.msg[j+4];
+																			num[1]=mensaje.msg[j+5];
+																			inter_Enc.m.t.h.minuto = atoi(num);
+																			j=j+5;
+																			i=j;
+																			break;
+
+																		case 'H':
+																			inter_Enc.m.tipo = CSAL_TP_M_HORA;
+																			num[0]=mensaje.msg[j+2];
+																			num[1]=mensaje.msg[j+3];
+																			inter_Enc.m.t.h.minuto = atoi(num);
+																			j=j+3;
+																			i=j;
+																			break;
+
+																	 }
+
+																 }
+
+																i++;
+																break;
+
+															default:
+																i++;
+
+													   }
+
+													}
+													c_sal_mensaje.tipo=1;
+													c_sal_mensaje.v.forzado.salida=mensaje.msg[2]-48;
+													c_sal_mensaje.v.forzado.encender= 1;
+													CSal_Envie_mensaje(&c_salidas, &c_sal_mensaje, 0);
+
+													//CSal_Configure_encendido(&c_salidas,  &c_sal_mensaje, &inter_Enc);
+													break;
+
+
+												case 'A':
+													i=3;
+													while(mensaje.msg[i] != 110){ //110 corresponde a n en ascci
+														switch(mensaje.msg[i]){
+															case 'E':
+
+																j=i+2;
+																k=0;
+																inter_Apa.banderas  |=   CSAL_B_ON_EVENTO;
+																inter_Apa.e.entrada = mensaje.msg [i+1] ;
+
+																while(mensaje.msg[j]!=59){ // 59 corresponde a ;
+																		ret[k]=mensaje.msg[j];
+																		j++;k++;
+																}
+																inter_Apa.e.retardo = atoi(ret);
+
+																i=j+1;
+
+																break;
+
+															case 'F':
+
+																 inter_Apa.banderas  |=   CSAL_B_ON_MOMENTO;
+																 j=i+1;
+
+																 while(mensaje.msg[j]!=59){
+
+																	 switch(mensaje.msg[j]){
+
+																		case 'A':
+
+																			inter_Apa.m.tipo = CSAL_TP_M_ANIO;
+																			num[0]=mensaje.msg[j+2];
+																			num[1]=mensaje.msg[j+3];
+																			inter_Apa.m.t.f.mes =atoi(num);
+																			num[0]=mensaje.msg[j+4];
+																			num[1]=mensaje.msg[j+5];
+																			inter_Apa.m.t.f.dia = atoi(num);
+																			num[0]=mensaje.msg[j+6];
+																			num[1]=mensaje.msg[j+7];
+																			inter_Apa.m.t.h.hora = atoi(num);
+																			num[0]=mensaje.msg[j+8];
+																			num[1]=mensaje.msg[j+9];
+																			inter_Apa.m.t.h.minuto = atoi(num);
+																			j=j+9;
+																			i=j;
+																			break;
+
+																		case 'M':
+
+																			inter_Apa.m.tipo = CSAL_TP_M_MES;
+																			num[0]=mensaje.msg[j+2];
+																			num[1]=mensaje.msg[j+3];
+																			inter_Apa.m.t.f.dia = atoi(num);
+																			num[0]=mensaje.msg[j+4];
+																			num[1]=mensaje.msg[j+5];
+																			inter_Apa.m.t.h.hora = atoi(num);
+																			num[0]=mensaje.msg[j+6];
+																			num[1]=mensaje.msg[j+7];
+																			inter_Apa.m.t.h.minuto = atoi(num);
+																			j=j+7;
+																			i=j;
+																			break;
+
+																		case 'S':
+
+																			inter_Apa.m.tipo = CSAL_TP_M_SEMANA;
+																			num[0]=0;
+																			num[1]=mensaje.msg[j+2];
+																			inter_Apa.m.t.s = atoi(num);
+																			num[0]=mensaje.msg[j+3];
+																			num[1]=mensaje.msg[j+4];
+																			inter_Apa.m.t.h.hora = atoi(num);
+																			num[0]=mensaje.msg[j+5];
+																			num[1]=mensaje.msg[j+6];
+																			inter_Apa.m.t.h.minuto = atoi(num);
+																			j=j+6;
+																			i=j;
+																			break;
+
+																		case 'D':
+																			inter_Apa.m.tipo = CSAL_TP_M_DIA;
+																			num[0]=mensaje.msg[j+2];
+																			num[1]=mensaje.msg[j+3];
+																			inter_Apa.m.t.h.hora = atoi(num);
+																			num[0]=mensaje.msg[j+4];
+																			num[1]=mensaje.msg[j+5];
+																			inter_Apa.m.t.h.minuto = atoi(num);
+																			j=j+5;
+																			i=j;
+																			break;
+																		case 'H':
+																			inter_Apa.m.tipo = CSAL_TP_M_HORA;
+																			num[0]=mensaje.msg[j+2];
+																			num[1]=mensaje.msg[j+3];
+																			inter_Apa.m.t.h.minuto = atoi(num);
+																			j=j+3;
+																			i=j;
+
+																			break;
+																	 }
+
+																 }
+
+																i++;
+																break;
+
+
+															case 'R':
+
+																inter_Apa.banderas  |=   CSAL_B_OFF_RETARDO;
+																j=i+1;
+																k=0;
+
+																while(mensaje.msg[j]!=59){
+																	num[k]=mensaje.msg[j];
+																	j++;
+																	k++;
+																}
+																inter_Apa.retardo = atoi(num);
+																break;
+
+
+															default:
+																i++;
+													   }
+
+
+													}
+			                                        CSal_Configure_apagado(&c_salidas, mensaje.msg[2], &inter_Apa);
+			                                        break;
+
+							}
+
+							break;
+
+						case'M':
+
+							switch(mensaje.msg[3]){
+								//Activo o inactivo
+
+							                case 'A':
+							                    CSal_Cambie_monitoreo(&c_salidas, SI);
+							                    break;
+							                case 'I':
+							                    CSal_Cambie_monitoreo(&c_salidas, NO);
+							                    break;
+									};
+							 break;
+
+						default:
+							break;
+			};
 	        };
-
-
-
 
 	    };
 };

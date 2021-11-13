@@ -59,8 +59,8 @@ void Interfaz_Procese (Interfaz_Control *iucp){
 	    	// si se recibe algo de la cola estando en este estado
 
 	    	if(lcd_render_state==1){
-	    		if(uxQueueMessagesWaiting(ColaInterfaz)){
-	    			xQueueReceive(ColaInterfaz,&dato_cola,0);
+	    		if(uxQueueMessagesWaiting(ColaInterfaz)){///sobra
+	    			xQueueReceive(ColaInterfaz,&dato_cola,0);//Retirar de una vez
 			    	clear_and_home();
 			    	 write_character(dato_cola);
 			    	 switch (dato_cola){
