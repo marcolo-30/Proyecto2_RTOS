@@ -33,9 +33,9 @@ char Interfaz_Inicie (Interfaz_Control *iucp, UBaseType_t prioridad){
 
 void Interfaz_Procese (Interfaz_Control *iucp){
 
-		char s='i';
-		char *line="hola rtos";
-		//char *lcd_msg = "LCD task\r\n";
+//		char s='i';
+//		char *line="hola rtos";
+//		//char *lcd_msg = "LCD task\r\n";
 		 TickType_t xLastWakeTime;
 		 xLastWakeTime = xTaskGetTickCount();
 

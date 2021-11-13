@@ -480,6 +480,20 @@ void BOARD_InitBootPins(void);
 #define BOARD_INITPINS_row1_PIN_MASK (1U << 1U)      /*!<@brief PORT pin mask */
                                                      /* @} */
 
+/*! @name PORTE29 (number 26), LED_RED
+  @{ */
+
+/* Symbols to be used with GPIO driver */
+#define BOARD_INITPINS_LED_RED_FGPIO FGPIOE              /*!<@brief FGPIO peripheral base pointer */
+#define BOARD_INITPINS_LED_RED_GPIO GPIOE                /*!<@brief GPIO peripheral base pointer */
+#define BOARD_INITPINS_LED_RED_GPIO_PIN_MASK (1U << 29U) /*!<@brief GPIO pin mask */
+
+/* Symbols to be used with PORT driver */
+#define BOARD_INITPINS_LED_RED_PORT PORTE                /*!<@brief PORT peripheral base pointer */
+#define BOARD_INITPINS_LED_RED_PIN 29U                   /*!<@brief PORT pin number */
+#define BOARD_INITPINS_LED_RED_PIN_MASK (1U << 29U)      /*!<@brief PORT pin mask */
+                                                         /* @} */
+
 /*!
  * @brief Configures pin routing and optionally pin electrical features.
  *

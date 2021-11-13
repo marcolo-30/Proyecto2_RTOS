@@ -10,6 +10,8 @@
 #include "task.h"
 #include "Varios.h"
 #include <stdlib.h>
+#include "fsl_gpio.h"
+
 
 #define MSG_INT_SIZE 25
 

@@ -274,6 +274,11 @@
                         <pin_feature name="direction" value="OUTPUT"/>
                      </pin_features>
                   </pin>
+                  <pin peripheral="GPIOE" signal="GPIO, 29" pin_num="26" pin_signal="CMP0_IN5/ADC0_SE4b/PTE29/TPM0_CH2/TPM_CLKIN0">
+                     <pin_features>
+                        <pin_feature name="direction" value="OUTPUT"/>
+                     </pin_features>
+                  </pin>
                </pins>
             </function>
          </functions_list>

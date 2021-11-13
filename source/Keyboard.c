@@ -54,6 +54,7 @@ void Keyboard_Procese (Keyboard_Control *cKey){
 
 		 int coordinates[]= {10,10};
 		 int flag_pressed = 0;
+
 	     for( ;; )
 	     {
 	         // In the first cicle jum move into the different outputs

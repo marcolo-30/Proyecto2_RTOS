@@ -119,6 +119,7 @@ BOARD_InitPins:
   - {pin_num: '40', peripheral: GPIOA, signal: 'GPIO, 6', pin_signal: PTA6/TPM0_CH3, direction: OUTPUT}
   - {pin_num: '44', peripheral: GPIOA, signal: 'GPIO, 14', pin_signal: PTA14/SPI0_PCS0/UART0_TX/I2S0_RX_BCLK/I2S0_TXD0, direction: OUTPUT}
   - {pin_num: '35', peripheral: GPIOA, signal: 'GPIO, 1', pin_signal: TSI0_CH2/PTA1/UART0_RX/TPM2_CH0, direction: OUTPUT}
+  - {pin_num: '26', peripheral: GPIOE, signal: 'GPIO, 29', pin_signal: CMP0_IN5/ADC0_SE4b/PTE29/TPM0_CH2/TPM_CLKIN0, direction: OUTPUT}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 /* clang-format on */
@@ -345,6 +346,13 @@ void BOARD_InitPins(void)
     /* Initialize GPIO functionality on pin PTE23 (pin 21)  */
     GPIO_PinInit(BOARD_INITPINS_D5_GPIO, BOARD_INITPINS_D5_PIN, &D5_config);
 
+    gpio_pin_config_t LED_RED_config = {
+        .pinDirection = kGPIO_DigitalOutput,
+        .outputLogic = 0U
+    };
+    /* Initialize GPIO functionality on pin PTE29 (pin 26)  */
+    GPIO_PinInit(BOARD_INITPINS_LED_RED_GPIO, BOARD_INITPINS_LED_RED_PIN, &LED_RED_config);
+
     gpio_pin_config_t D7_config = {
         .pinDirection = kGPIO_DigitalOutput,
         .outputLogic = 0U
@@ -533,6 +541,9 @@ void BOARD_InitPins(void)
 
     /* PORTE23 (pin 21) is configured as PTE23 */
     PORT_SetPinMux(BOARD_INITPINS_D5_PORT, BOARD_INITPINS_D5_PIN, kPORT_MuxAsGpio);
+
+    /* PORTE29 (pin 26) is configured as PTE29 */
+    PORT_SetPinMux(BOARD_INITPINS_LED_RED_PORT, BOARD_INITPINS_LED_RED_PIN, kPORT_MuxAsGpio);
 
     /* PORTE3 (pin 4) is configured as PTE3 */
     PORT_SetPinMux(BOARD_INITPINS_E7_PORT, BOARD_INITPINS_E7_PIN, kPORT_MuxAsGpio);
