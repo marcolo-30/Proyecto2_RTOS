@@ -256,10 +256,10 @@ static void comRxUart_task(void *pvParameters){
 				 //enviar al interprete de comandos cuando se oprima el enter
 
 				 if( uart_data == 0xd){
-					    GPIO_WritePinOutput(GPIOC,BOARD_INITPINS_S7_PIN,1);
+					   /* GPIO_WritePinOutput(GPIOC,BOARD_INITPINS_S7_PIN,1);
 					    vTaskDelay( oneSecond );
 					    GPIO_WritePinOutput(GPIOC,BOARD_INITPINS_S7_PIN,0);
-
+*/
 					    //inter_mensaje.msg[0]='G';
 					 // enviamos la estructura que necesita el interprete de comandos
 					    Interprete_envie_mensaje(&inter_cont,&inter_mensaje,portMAX_DELAY);

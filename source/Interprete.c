@@ -74,22 +74,12 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 							switch(mensaje.msg[1]){
 								case 'E':
 
-										c_sal_mensaje.tipo=1;
-										c_sal_mensaje.v.forzado.salida=0;
-										c_sal_mensaje.v.forzado.encender=k;
-										CSal_Envie_mensaje(&c_salidas, &c_sal_mensaje, 0);
 
-										//c_salidas.t_cfg.on=1;
 
 								break;
 								case 'A':
-									//c_salidas.t_cfg.on=1;
-													c_sal_mensaje.tipo=1;
-													c_sal_mensaje.v.forzado.salida=1;
-													c_sal_mensaje.v.forzado.encender=1;
 
-													CSal_Envie_mensaje(&c_salidas, &c_sal_mensaje, 0);
-													break;
+								break;
 								default:
 								break;
 
@@ -328,7 +318,7 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 
 																 }
 
-																i++;
+
 																break;
 
 
@@ -353,7 +343,13 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 
 
 													}
-			                                        CSal_Configure_apagado(&c_salidas, mensaje.msg[2], &inter_Apa);
+													i++;
+
+													c_sal_mensaje.tipo=1;
+													c_sal_mensaje.v.forzado.salida=mensaje.msg[2]-48;
+													c_sal_mensaje.v.forzado.encender= 0;
+													CSal_Envie_mensaje(&c_salidas, &c_sal_mensaje, 0);
+			                                       // CSal_Configure_apagado(&c_salidas, mensaje.msg[2]-45, &inter_Apa);
 			                                        break;
 
 							}
