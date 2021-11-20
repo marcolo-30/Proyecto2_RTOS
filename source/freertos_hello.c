@@ -100,6 +100,8 @@ QueueHandle_t ColaRx;
 QueueHandle_t ColaKeyboard;
 QueueHandle_t ColaTx;
 QueueHandle_t ColaInterfaz;
+SemaphoreHandle_t mutexLCD;
+
 
 
 char dato_rx;
@@ -208,7 +210,7 @@ int main(void)
     };
 
     Interprete_Inicie (&inter_cont,tskIDLE_PRIORITY + 3);
-
+    mutexLCD = xSemaphoreCreateMutex();
 
 
     ColaRx = xQueueCreate( 64, sizeof(char));

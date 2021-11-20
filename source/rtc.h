@@ -27,4 +27,6 @@ char RTC_Inicie (RTC_Control *cRtcsp, UBaseType_t prioridad);
 
 void RTC_Procese (RTC_Control *cRtcsp);
 
+void RTC_envie(RTC_Control *cRtcsp);
+
 #endif /* RTC_H_ */

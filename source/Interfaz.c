@@ -19,7 +19,7 @@
 
 
 extern QueueHandle_t ColaInterfaz;
-
+extern SemaphoreHandle_t mutexLCD;
 
 char Interfaz_Inicie (Interfaz_Control *iucp, UBaseType_t prioridad){
 
@@ -41,7 +41,10 @@ void Interfaz_Procese (Interfaz_Control *iucp){
 
 		 const TickType_t lcd_time = 1000/ portTICK_PERIOD_MS;
 
+		 xSemaphoreTake(mutexLCD, portMAX_DELAY);
 		 init_LCD_display();
+		 xSemaphoreGive(mutexLCD);
+
 		 int lcd_render_state=0;
 
 		 char dato_cola;
@@ -50,10 +53,16 @@ void Interfaz_Procese (Interfaz_Control *iucp){
 	    	//vTaskDelayUntil( &xLastWakeTime, lcd_time );
 
 	    	if(lcd_render_state==0){
+
+	    		xSemaphoreTake(mutexLCD, portMAX_DELAY);
 		    	clear_and_home();
-		    	write_line("A.ProgF/H B.For");
+		    	//write_line("A.ProgF/H B.For");
 		    	write_second_line();
-		    	write_line("C.Mon D.Alrm");
+		    	write_line("A. B. C. D.");
+//		    	write_character('a');
+//		    	imprimirA();
+		    	xSemaphoreGive(mutexLCD);
+
 		    	lcd_render_state=1;
 	    	}
 	    	// si se recibe algo de la cola estando en este estado
@@ -61,33 +70,48 @@ void Interfaz_Procese (Interfaz_Control *iucp){
 	    	if(lcd_render_state==1){
 	    		if(uxQueueMessagesWaiting(ColaInterfaz)){///sobra
 	    			xQueueReceive(ColaInterfaz,&dato_cola,0);//Retirar de una vez
+	    			xSemaphoreTake(mutexLCD, portMAX_DELAY);
 			    	clear_and_home();
 			    	 write_character(dato_cola);
+			    	 xSemaphoreGive(mutexLCD);
+
 			    	 switch (dato_cola){
 			    	 	 case 'A':
+			    	 		xSemaphoreTake(mutexLCD, portMAX_DELAY);
 			 		    	clear_and_home();
 			 		    	write_line("Programing State");
+			 		    	xSemaphoreGive(mutexLCD);
+
 			 		    	lcd_render_state=2;
 			    	 		 break;
 			    	 	 case 'B':
+			    	 		xSemaphoreTake(mutexLCD, portMAX_DELAY);
 				 		    clear_and_home();
 				 		    write_line("Mode Forzado");
+				 		   xSemaphoreGive(mutexLCD);
+
 				 		   lcd_render_state=2;
 			    	 		 break;
 			    	 	 case 'C':
+			    	 		xSemaphoreTake(mutexLCD, portMAX_DELAY);
 					 		 clear_and_home();
 					 		write_line("A/D Monitoreo");
+					 		 xSemaphoreGive(mutexLCD);
 					 		lcd_render_state=2;
 			    	 		 break;
 			    	 	 case 'D':
+			    	 		xSemaphoreTake(mutexLCD, portMAX_DELAY);
 					 		 clear_and_home();
 					 		write_line("Alarma");
+					 		xSemaphoreGive(mutexLCD);
 					 		lcd_render_state=2;
 			    	 		 break;
 			    	 	 default:
+			    	 		xSemaphoreTake(mutexLCD, portMAX_DELAY);
 					 		clear_and_home();
 					 		write_line("Wrong Key");
 					 		vTaskDelay( lcd_time );
+					 		xSemaphoreGive(mutexLCD);
 					 		lcd_render_state=0;
 
 
