@@ -5,6 +5,8 @@
 #include "semphr.h"
 #include "task.h"
 #include "Varios.h"
+#include "pin_mux.h"
+#include "fsl_gpio.h"
 
 #define CENT_NUM_ENTRADAS        8
 

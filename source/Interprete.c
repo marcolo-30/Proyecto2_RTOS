@@ -9,7 +9,7 @@
 #include "fsl_debug_console.h"
 #include "pin_mux.h"
 #include <queue.h>
-
+#include "CtlEntradas.h"
 #include "CtlSalidas.h"
 #include "pin_mux.h"
 
@@ -18,7 +18,7 @@
 
 extern CSal_Control c_salidas;
 extern CSal_Mensaje c_sal_mensaje;
-//extern CEnt_Control c_entrada;
+extern CEnt_Control c_entrada;
 
 CSal_Encendido inter_Enc;
 CSal_Apagado   inter_Apa;
@@ -46,9 +46,10 @@ char Interprete_Inicie (Interprete_Control *interp_contp, UBaseType_t prioridad)
 void Interprete_Procese (Interprete_Control *interp_contp){
 	const TickType_t oneSecond = 1000 / portTICK_PERIOD_MS;
 	int state=0;
-	char minp[4];
-	char ret[4];
-	char num [2];
+	char minp[4]={0,0,0,0};
+	char ret[4]={0,0,0,0};
+	char num [2]={0,0};
+	char num_pulso[4]={0,0,0,0};
 	int i=0,j=0,k=0;
 
 	 while (SI)
@@ -74,11 +75,19 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 							switch(mensaje.msg[1]){
 								case 'E':
 
+									if(mensaje.msg[3] == 'P' ){
+										num_pulso[0]=mensaje.msg[4];
+										num_pulso[1]=mensaje.msg[5];
+										num_pulso[2]=mensaje.msg[6];
+										num_pulso[3]=mensaje.msg[7];
+									}
 
-
+									CEnt_Configure_evento(&c_entrada,mensaje.msg[1]-48,mensaje.msg[2],mensaje.msg[3], atoi(num_pulso));
 								break;
+
 								case 'A':
 
+									//CEnt_Configure_alarma(CEnt_Control *cesp, char entrada, char activa);
 								break;
 								default:
 								break;
@@ -87,6 +96,7 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 							break;
 
 						case 'S':
+							//c_sal_mensaje.tipo=CSAL_TMSG_FORZADO;
 							switch(mensaje.msg[1]){
 												case 'E':
 													i=3;
@@ -104,7 +114,7 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 																		j++;k++;
 																}
 																inter_Enc.e.retardo = atoi(ret);
-
+																//c_sal_mensaje.tipo=CSAL_TMSG_EVENTO;
 																i=j+1;
 
 																break;
@@ -196,6 +206,7 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 																 }
 
 																i++;
+																//c_sal_mensaje.tipo=CSAL_TMSG_RTC ;
 																break;
 
 															default:
@@ -204,10 +215,10 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 													   }
 
 													}
-													c_sal_mensaje.tipo=1;
-													c_sal_mensaje.v.forzado.salida=mensaje.msg[2]-48;
-													c_sal_mensaje.v.forzado.encender= 1;
-													CSal_Envie_mensaje(&c_salidas, &c_sal_mensaje, 0);
+													//c_sal_mensaje.tipo=1;
+													//c_sal_mensaje.v.forzado.salida=mensaje.msg[2]-48;
+													//c_sal_mensaje.v.forzado.encender= 1;
+													//CSal_Envie_mensaje(&c_salidas, &c_sal_mensaje, 0);
 
 													CSal_Configure_encendido(&c_salidas,  &c_sal_mensaje, &inter_Enc);
 													break;

@@ -19,6 +19,8 @@ extern char LCDB;
 
 uint32_t PIN_Entradas [8] = {2U,3U,6U,16U,17U,18U,19U,31U};
 
+int state=0;
+
 char CEnt_Inicie (CEnt_Control *cesp, 
                   UBaseType_t prioridad)
    {
@@ -47,6 +49,8 @@ char CEnt_Inicie (CEnt_Control *cesp,
 void CEnt_Procese (CEnt_Control *cesp)
 /* void CEnt_Procese (void *pp) */
    {
+
+
    /* CEnt_Control *cecp = (CEnt_Control *) pp; */
    TickType_t tickactualA;
    uint32_t  anterior,
@@ -66,10 +70,18 @@ void CEnt_Procese (CEnt_Control *cesp)
    tickactualA = xTaskGetTickCount();
    while (SI)
       {
+		if(state==0){
+			GPIO_WritePinOutput(GPIOE,BOARD_INITPINS_LED_RED_PIN,1);
+			state=1;
+		}
+		else{
+			GPIO_WritePinOutput(GPIOE,BOARD_INITPINS_LED_RED_PIN,0);
+			state=0;
+		}
       vTaskDelayUntil(&tickactualA, PERIODO_1SEG);
  //     actual = PUERTO;
       actual = PUERTO->PDIR; // lectura de los puertos actual
-//      xSemaphoreTake(cesp->mutex_cfg, portMAX_DELAY);
+      xSemaphoreTake(cesp->mutex_cfg, portMAX_DELAY);
       for (cep = cesp->t_cfg, i =  0, bit_mask = 0x01, alarmas = 0;
            i < CENT_NUM_ENTRADAS;
            ++cep, ++i, bit_mask <<= 1)
@@ -135,7 +147,7 @@ void CEnt_Procese (CEnt_Control *cesp)
                };
             };
          };
-    //  xSemaphoreGive(cesp->mutex_cfg);
+      xSemaphoreGive(cesp->mutex_cfg);
 
       anterior = actual;   /* El valor actual del puerto se vuelve el siguiente valor anterior */
       for (i =  0, bit_mask = 0x01;

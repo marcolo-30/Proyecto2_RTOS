@@ -46,6 +46,7 @@
 
 /* Custom Libraries. */
 #include "CtlSalidas.h"
+#include "CtlEntradas.h"
 #include "Interprete.h"
 #include "Keyboard.h"
 #include "lcd.h"
@@ -72,6 +73,7 @@
 * Handlers
 ******************************************************************************/
 CSal_Control c_salidas;
+CEnt_Control c_entrada;
 CSal_Mensaje c_sal_mensaje;
 Interprete_Control inter_cont;
 Interprete_mensaje inter_mensaje;
@@ -207,6 +209,10 @@ int main(void)
 
     if(CSal_Inicie (&c_salidas , tskIDLE_PRIORITY + 3)){
     	PRINTF("No fue posible inicializar el modulo salidas !.\r\n");
+    };
+
+    if(CEnt_Inicie  (&c_entrada , tskIDLE_PRIORITY + 3)){
+    	PRINTF("No fue posible inicializar el modulo ENTRADAS !.\r\n");
     };
 
     Interprete_Inicie (&inter_cont,tskIDLE_PRIORITY + 3);

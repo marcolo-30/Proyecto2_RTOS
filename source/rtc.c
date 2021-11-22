@@ -86,14 +86,9 @@ void RTC_Procese (RTC_Control *cRtcsp){
 	}
 }
 
+/*Enviar datos al LCD*/
 void RTC_envie(RTC_Control *cRtcsp){
 
-
-
-	//    int ones=anio%10;
-	//    int tens = (anio/10)%10;
-	//    int hundreds = (anio/100)%10;
-	//    int thousands = (anio/1000);
 
 	int hora=cRtcsp->TiempoRTC.h.hora;
 	int minuto = cRtcsp->TiempoRTC.h.minuto;
