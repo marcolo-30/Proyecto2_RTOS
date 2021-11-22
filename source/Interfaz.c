@@ -70,15 +70,16 @@ void Interfaz_Procese (Interfaz_Control *iucp){
 	    	if(lcd_render_state==1){
 	    		if(uxQueueMessagesWaiting(ColaInterfaz)){///sobra
 	    			xQueueReceive(ColaInterfaz,&dato_cola,0);//Retirar de una vez
-	    			xSemaphoreTake(mutexLCD, portMAX_DELAY);
-			    	clear_and_home();
-			    	 write_character(dato_cola);
-			    	 xSemaphoreGive(mutexLCD);
+//	    			xSemaphoreTake(mutexLCD, portMAX_DELAY);
+//			    	clear_and_home();
+//			    	 write_character(dato_cola);
+//			    	 xSemaphoreGive(mutexLCD);
 
 			    	 switch (dato_cola){
 			    	 	 case 'A':
 			    	 		xSemaphoreTake(mutexLCD, portMAX_DELAY);
-			 		    	clear_and_home();
+			 		    	//clear_and_home();
+			    	 		write_second_line();
 			 		    	write_line("Programing State");
 			 		    	xSemaphoreGive(mutexLCD);
 
@@ -86,7 +87,8 @@ void Interfaz_Procese (Interfaz_Control *iucp){
 			    	 		 break;
 			    	 	 case 'B':
 			    	 		xSemaphoreTake(mutexLCD, portMAX_DELAY);
-				 		    clear_and_home();
+				 		    //clear_and_home();
+			    	 		write_second_line();
 				 		    write_line("Mode Forzado");
 				 		   xSemaphoreGive(mutexLCD);
 
@@ -94,21 +96,24 @@ void Interfaz_Procese (Interfaz_Control *iucp){
 			    	 		 break;
 			    	 	 case 'C':
 			    	 		xSemaphoreTake(mutexLCD, portMAX_DELAY);
-					 		 clear_and_home();
+					 		 //clear_and_home();
+			    	 		write_second_line();
 					 		write_line("A/D Monitoreo");
 					 		 xSemaphoreGive(mutexLCD);
 					 		lcd_render_state=2;
 			    	 		 break;
 			    	 	 case 'D':
 			    	 		xSemaphoreTake(mutexLCD, portMAX_DELAY);
-					 		 clear_and_home();
+					 		 //clear_and_home();
+			    	 		write_second_line();
 					 		write_line("Alarma");
 					 		xSemaphoreGive(mutexLCD);
 					 		lcd_render_state=2;
 			    	 		 break;
 			    	 	 default:
 			    	 		xSemaphoreTake(mutexLCD, portMAX_DELAY);
-					 		clear_and_home();
+					 		//clear_and_home();
+			    	 		write_second_line();
 					 		write_line("Wrong Key");
 					 		vTaskDelay( lcd_time );
 					 		xSemaphoreGive(mutexLCD);
