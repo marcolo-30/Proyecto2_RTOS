@@ -209,7 +209,7 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 													c_sal_mensaje.v.forzado.encender= 1;
 													CSal_Envie_mensaje(&c_salidas, &c_sal_mensaje, 0);
 
-													//CSal_Configure_encendido(&c_salidas,  &c_sal_mensaje, &inter_Enc);
+													CSal_Configure_encendido(&c_salidas,  &c_sal_mensaje, &inter_Enc);
 													break;
 
 
