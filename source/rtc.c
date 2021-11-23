@@ -14,7 +14,10 @@
 //#define RAPIDISIMO
 
 extern SemaphoreHandle_t mutexLCD;
-int hora_ones,hora_tens,minuto_ones,minuto_tens;
+int hora_ones,hora_tens,minuto_ones,minuto_tens,anio_ones,anio_tens,anio_hundreds,anio_thousands,mes_ones,mes_tens,dia_ones,dia_tens;
+
+static   uint8_t diasMes[]={31,29,31,30,31,30,31,31,30,31,30,31}; //Array para los dias del mes
+
 
 char RTC_Inicie (RTC_Control *cRtcsp,
                   UBaseType_t prioridad)
@@ -46,6 +49,9 @@ void RTC_Procese (RTC_Control *cRtcsp){
 
 		vTaskDelayUntil( &xLastWakeTime, one_second );
 
+		cRtcsp->TiempoRTC.h.segundo++;
+		(cRtcsp->TiempoRTC.h.segundo)+=60;
+
 		//Just for Show RTC is working
 //		if(state==0){
 //			GPIO_WritePinOutput(GPIOE,BOARD_INITPINS_LED_RED_PIN,1);
@@ -55,33 +61,56 @@ void RTC_Procese (RTC_Control *cRtcsp){
 //			GPIO_WritePinOutput(GPIOE,BOARD_INITPINS_LED_RED_PIN,0);
 //			state=0;
 //		}
+		//--------------------Segundos------------------------------------------
 		if((cRtcsp->TiempoRTC.h.segundo)>59){
 			cRtcsp->TiempoRTC.h.minuto ++;
 			cRtcsp->TiempoRTC.h.segundo=0;
 			RTC_envie(cRtcsp);
 		}
-		else{
-			cRtcsp->TiempoRTC.h.segundo++;
-		}
 
-
+		//--------------------Minutos------------------------------------------
 		if((cRtcsp->TiempoRTC.h.minuto)>59){
 			cRtcsp->TiempoRTC.h.hora ++;
 			cRtcsp->TiempoRTC.h.minuto=0;
 			RTC_envie(cRtcsp);
 		}
 
-
+		//--------------------Horas------------------------------------------
 		if((cRtcsp->TiempoRTC.h.hora)>23){
 			cRtcsp->TiempoRTC.f.dia ++;
 			cRtcsp->TiempoRTC.h.hora=0;
 			RTC_envie(cRtcsp);
 		}
 
+		//-------------------- Días ------------------------------------------
+		//Los días dependen del mes actual
+		if((cRtcsp->TiempoRTC.f.dia)>diasMes[(cRtcsp->TiempoRTC.f.mes)-1]){//Enero es el mes 1 pero es el que yo quiero en la posicion 0
+			cRtcsp->TiempoRTC.f.mes ++;
+			cRtcsp->TiempoRTC.f.dia = 1;
+			RTC_envie(cRtcsp);
+		}
 
+		//-------------------- Mes ------------------------------------------
+		//Los días dependen del mes actual
+		if((cRtcsp->TiempoRTC.f.dia)>diasMes[(cRtcsp->TiempoRTC.f.mes)-1]){//Enero es el mes 1 pero es el que yo quiero en la posicion 0
+			cRtcsp->TiempoRTC.f.mes ++;
+			cRtcsp->TiempoRTC.f.dia = 1;
+			RTC_envie(cRtcsp);
+		}
 
+		// ------------------ Anios------------------------------------------
+		if( cRtcsp->TiempoRTC.f.mes > 12 ){
+			cRtcsp->TiempoRTC.f.anio ++;
+			 cRtcsp->TiempoRTC.f.mes = 1;
+			 RTC_envie(cRtcsp);
 
-
+			//Biciesto Library
+			int bis =cRtcsp->TiempoRTC.f.anio;
+			if (bis % 4 == 0 && bis % 100 != 0 || bis % 400 == 0)
+				diasMes[1] = 29;
+			else
+				diasMes[1] = 28;
+		}
 
 	}
 }
@@ -89,6 +118,20 @@ void RTC_Procese (RTC_Control *cRtcsp){
 /*Enviar datos al LCD*/
 void RTC_envie(RTC_Control *cRtcsp){
 
+	int anio=cRtcsp->TiempoRTC.f.anio;
+	anio_ones=anio%10;
+	anio_tens=(anio/10)%10;
+	anio_hundreds=(anio/100)%10;
+	anio_thousands=anio/1000;
+
+
+	int mes=cRtcsp->TiempoRTC.f.mes;
+	mes_ones=mes%10;
+	mes_tens=(mes/10)%10;
+
+	int dia=cRtcsp->TiempoRTC.f.dia;
+	dia_ones=dia%10;
+	dia_tens=(dia/10)%10;
 
 	int hora=cRtcsp->TiempoRTC.h.hora;
 	int minuto = cRtcsp->TiempoRTC.h.minuto;
@@ -99,13 +142,13 @@ void RTC_envie(RTC_Control *cRtcsp){
 	minuto_tens=(minuto/10)%10;
 
 
-    char trama[5]={hora_tens+48,hora_ones+48,':',minuto_tens+48,minuto_ones+48};
+    char trama[16]={anio_thousands+48,anio_hundreds+48,anio_tens+48,anio_ones+48,'/',mes_tens+48,mes_ones+48,'/',dia_tens+48,dia_ones+48,' ',hora_tens+48,hora_ones+48,':',minuto_tens+48,minuto_ones+48};
 
 
 
-    xSemaphoreTake(mutexLCD, portMAX_DELAY);
+   xSemaphoreTake(mutexLCD, portMAX_DELAY);
    home();
-    for (int i=0;i<=4;i++){
+    for (int i=0;i<=16;i++){
 
     	write_character(trama[i]);
     }
