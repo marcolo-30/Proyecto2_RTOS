@@ -43,14 +43,16 @@ void RTC_Procese (RTC_Control *cRtcsp){
 	TickType_t xLastWakeTime;
 	xLastWakeTime = xTaskGetTickCount();
 
-	const TickType_t one_second = 10/ portTICK_PERIOD_MS;
+	const TickType_t one_second = 1000/ portTICK_PERIOD_MS;
 
 	while (SI){
 
 		vTaskDelayUntil( &xLastWakeTime, one_second );
 
-		cRtcsp->TiempoRTC.h.segundo++;
-		(cRtcsp->TiempoRTC.h.segundo)+=60;
+	//	cRtcsp->TiempoRTC.h.segundo++;
+	//	(cRtcsp->TiempoRTC.h.segundo)+=60;  //Prueba con minutos
+	//	(cRtcsp->TiempoRTC.h.minuto)+=60; //Prueba con horas
+		(cRtcsp->TiempoRTC.h.hora)+=24;
 
 		//Just for Show RTC is working
 //		if(state==0){
