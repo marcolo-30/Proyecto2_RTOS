@@ -81,8 +81,12 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 										num_pulso[2]=mensaje.msg[6];
 										num_pulso[3]=mensaje.msg[7];
 									}
-
-									CEnt_Configure_evento(&c_entrada,mensaje.msg[1]-48,mensaje.msg[2],mensaje.msg[3], atoi(num_pulso));
+									/*CEnt_Configure_evento (CEnt_Control *cesp,
+									                            char entrada,
+									                            char activo,
+									                            char tipo,
+									                            unsigned short ancho)*/
+									CEnt_Configure_evento(&c_entrada,mensaje.msg[2]-48,mensaje.msg[3]-48,mensaje.msg[3], atoi(num_pulso));
 								break;
 
 								case 'A':

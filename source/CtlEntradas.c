@@ -53,7 +53,7 @@ void CEnt_Procese (CEnt_Control *cesp)
 
    /* CEnt_Control *cecp = (CEnt_Control *) pp; */
    TickType_t tickactualA;
-   uint32_t  anterior,
+   unsigned char   anterior,
                   actual;
    char i;
    CEnt_Cfg_entrada *cep;
@@ -66,7 +66,7 @@ void CEnt_Procese (CEnt_Control *cesp)
    char txt_alarma[4] = { 'A', '0', '\n', '\0' };
    
    //anterior = PUERTO;
-   anterior = PUERTO->PDIR; // Lectura de los puertos anterior
+   anterior = PUERTO->PDIR; // Lectura de los puertos anterior 0000 0000
    tickactualA = xTaskGetTickCount();
    while (SI)
       {
@@ -80,7 +80,7 @@ void CEnt_Procese (CEnt_Control *cesp)
 		}
       vTaskDelayUntil(&tickactualA, PERIODO_1SEG);
  //     actual = PUERTO;
-      actual = PUERTO->PDIR; // lectura de los puertos actual
+      actual = PUERTO->PDIR; // lectura de los puertos actual 0000 0000
       xSemaphoreTake(cesp->mutex_cfg, portMAX_DELAY);
       for (cep = cesp->t_cfg, i =  0, bit_mask = 0x01, alarmas = 0;
            i < CENT_NUM_ENTRADAS;
