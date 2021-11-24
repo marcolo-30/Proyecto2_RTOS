@@ -246,6 +246,7 @@ static void comRxUart_task(void *pvParameters){
 	const TickType_t oneSecond = 1000 / portTICK_PERIOD_MS;
 	uint8_t uart_data ;
 
+
 	for (;;)
 	    {
 

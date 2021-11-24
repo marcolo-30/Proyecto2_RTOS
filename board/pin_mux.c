@@ -100,18 +100,18 @@ BOARD_InitPins:
     direction: OUTPUT, slew_rate: slow}
   - {pin_num: '86', peripheral: GPIOC, signal: 'GPIO, 10', pin_signal: LCD_P30/PTC10/I2C1_SCL/I2S0_RX_FS/LCD_P30_Fault, identifier: S4, direction: OUTPUT}
   - {pin_num: '87', peripheral: GPIOC, signal: 'GPIO, 11', pin_signal: LCD_P31/PTC11/I2C1_SDA/I2S0_RXD0/LCD_P31_Fault, identifier: S3, direction: OUTPUT}
-  - {pin_num: '3', peripheral: GPIOE, signal: 'GPIO, 2', pin_signal: LCD_P50/PTE2/SPI1_SCK/LCD_P50_Fault, direction: INPUT}
-  - {pin_num: '4', peripheral: GPIOE, signal: 'GPIO, 3', pin_signal: LCD_P51/PTE3/SPI1_MISO/SPI1_MOSI/LCD_P51_Fault, direction: INPUT}
-  - {pin_num: '7', peripheral: GPIOE, signal: 'GPIO, 6', pin_signal: LCD_P54/PTE6/I2S0_MCLK/USB_SOF_OUT/LCD_P54_Fault, direction: INPUT}
+  - {pin_num: '3', peripheral: GPIOE, signal: 'GPIO, 2', pin_signal: LCD_P50/PTE2/SPI1_SCK/LCD_P50_Fault, direction: INPUT, pull_select: down, pull_enable: enable}
+  - {pin_num: '4', peripheral: GPIOE, signal: 'GPIO, 3', pin_signal: LCD_P51/PTE3/SPI1_MISO/SPI1_MOSI/LCD_P51_Fault, direction: INPUT, pull_select: down, pull_enable: enable}
+  - {pin_num: '7', peripheral: GPIOE, signal: 'GPIO, 6', pin_signal: LCD_P54/PTE6/I2S0_MCLK/USB_SOF_OUT/LCD_P54_Fault, direction: INPUT, pull_select: down, pull_enable: enable}
   - {pin_num: '14', peripheral: GPIOE, signal: 'GPIO, 16', pin_signal: LCD_P55/ADC0_DP1/ADC0_SE1/PTE16/SPI0_PCS0/UART2_TX/TPM_CLKIN0/LCD_P55_Fault, direction: INPUT,
-    slew_rate: slow}
+    slew_rate: slow, pull_select: down, pull_enable: enable}
   - {pin_num: '15', peripheral: GPIOE, signal: 'GPIO, 17', pin_signal: LCD_P56/ADC0_DM1/ADC0_SE5a/PTE17/SPI0_SCK/UART2_RX/TPM_CLKIN1/LPTMR0_ALT3/LCD_P56_Fault, direction: INPUT,
-    slew_rate: slow}
+    slew_rate: slow, pull_select: down, pull_enable: enable}
   - {pin_num: '16', peripheral: GPIOE, signal: 'GPIO, 18', pin_signal: LCD_P57/ADC0_DP2/ADC0_SE2/PTE18/SPI0_MOSI/I2C0_SDA/SPI0_MISO/LCD_P57_Fault, direction: INPUT,
-    slew_rate: slow}
+    slew_rate: slow, pull_select: down, pull_enable: enable}
   - {pin_num: '17', peripheral: GPIOE, signal: 'GPIO, 19', pin_signal: LCD_P58/ADC0_DM2/ADC0_SE6a/PTE19/SPI0_MISO/I2C0_SCL/SPI0_MOSI/LCD_P58_Fault, direction: INPUT,
-    slew_rate: slow}
-  - {pin_num: '28', peripheral: GPIOE, signal: 'GPIO, 31', pin_signal: PTE31/TPM0_CH4, direction: INPUT}
+    slew_rate: slow, pull_select: down, pull_enable: enable}
+  - {pin_num: '28', peripheral: GPIOE, signal: 'GPIO, 31', pin_signal: PTE31/TPM0_CH4, direction: INPUT, pull_select: down, pull_enable: enable}
   - {pin_num: '1', peripheral: UART1, signal: TX, pin_signal: LCD_P48/PTE0/SPI1_MISO/UART1_TX/RTC_CLKOUT/CMP0_OUT/I2C1_SDA/LCD_P48_Fault}
   - {pin_num: '2', peripheral: UART1, signal: RX, pin_signal: LCD_P49/PTE1/SPI1_MOSI/UART1_RX/SPI1_MISO/I2C1_SCL/LCD_P49_Fault}
   - {pin_num: '84', peripheral: GPIOC, signal: 'GPIO, 8', pin_signal: LCD_P28/CMP0_IN2/PTC8/I2C0_SCL/TPM0_CH4/I2S0_MCLK/LCD_P28_Fault, direction: INPUT, gpio_interrupt: no_init,
@@ -489,52 +489,68 @@ void BOARD_InitPins(void)
     /* PORTE1 (pin 2) is configured as UART1_RX */
     PORT_SetPinMux(BOARD_INITPINS_RX_PORT, BOARD_INITPINS_RX_PIN, kPORT_MuxAlt3);
 
+    const port_pin_config_t E5 = {/* Internal pull-down resistor is enabled */
+                                  kPORT_PullDown,
+                                  /* Slow slew rate is configured */
+                                  kPORT_SlowSlewRate,
+                                  /* Passive filter is disabled */
+                                  kPORT_PassiveFilterDisable,
+                                  /* Low drive strength is configured */
+                                  kPORT_LowDriveStrength,
+                                  /* Pin is configured as PTE16 */
+                                  kPORT_MuxAsGpio};
     /* PORTE16 (pin 14) is configured as PTE16 */
-    PORT_SetPinMux(BOARD_INITPINS_E5_PORT, BOARD_INITPINS_E5_PIN, kPORT_MuxAsGpio);
+    PORT_SetPinConfig(BOARD_INITPINS_E5_PORT, BOARD_INITPINS_E5_PIN, &E5);
 
-    PORTE->PCR[16] = ((PORTE->PCR[16] &
-                       /* Mask bits to zero which are setting */
-                       (~(PORT_PCR_SRE_MASK | PORT_PCR_ISF_MASK)))
-
-                      /* Slew Rate Enable: Slow slew rate is configured on the corresponding pin, if the pin is
-                       * configured as a digital output. */
-                      | PORT_PCR_SRE(kPORT_SlowSlewRate));
-
+    const port_pin_config_t E4 = {/* Internal pull-down resistor is enabled */
+                                  kPORT_PullDown,
+                                  /* Slow slew rate is configured */
+                                  kPORT_SlowSlewRate,
+                                  /* Passive filter is disabled */
+                                  kPORT_PassiveFilterDisable,
+                                  /* Low drive strength is configured */
+                                  kPORT_LowDriveStrength,
+                                  /* Pin is configured as PTE17 */
+                                  kPORT_MuxAsGpio};
     /* PORTE17 (pin 15) is configured as PTE17 */
-    PORT_SetPinMux(BOARD_INITPINS_E4_PORT, BOARD_INITPINS_E4_PIN, kPORT_MuxAsGpio);
+    PORT_SetPinConfig(BOARD_INITPINS_E4_PORT, BOARD_INITPINS_E4_PIN, &E4);
 
-    PORTE->PCR[17] = ((PORTE->PCR[17] &
-                       /* Mask bits to zero which are setting */
-                       (~(PORT_PCR_SRE_MASK | PORT_PCR_ISF_MASK)))
-
-                      /* Slew Rate Enable: Slow slew rate is configured on the corresponding pin, if the pin is
-                       * configured as a digital output. */
-                      | PORT_PCR_SRE(kPORT_SlowSlewRate));
-
+    const port_pin_config_t E3 = {/* Internal pull-down resistor is enabled */
+                                  kPORT_PullDown,
+                                  /* Slow slew rate is configured */
+                                  kPORT_SlowSlewRate,
+                                  /* Passive filter is disabled */
+                                  kPORT_PassiveFilterDisable,
+                                  /* Low drive strength is configured */
+                                  kPORT_LowDriveStrength,
+                                  /* Pin is configured as PTE18 */
+                                  kPORT_MuxAsGpio};
     /* PORTE18 (pin 16) is configured as PTE18 */
-    PORT_SetPinMux(BOARD_INITPINS_E3_PORT, BOARD_INITPINS_E3_PIN, kPORT_MuxAsGpio);
+    PORT_SetPinConfig(BOARD_INITPINS_E3_PORT, BOARD_INITPINS_E3_PIN, &E3);
 
-    PORTE->PCR[18] = ((PORTE->PCR[18] &
-                       /* Mask bits to zero which are setting */
-                       (~(PORT_PCR_SRE_MASK | PORT_PCR_ISF_MASK)))
-
-                      /* Slew Rate Enable: Slow slew rate is configured on the corresponding pin, if the pin is
-                       * configured as a digital output. */
-                      | PORT_PCR_SRE(kPORT_SlowSlewRate));
-
+    const port_pin_config_t E2 = {/* Internal pull-down resistor is enabled */
+                                  kPORT_PullDown,
+                                  /* Slow slew rate is configured */
+                                  kPORT_SlowSlewRate,
+                                  /* Passive filter is disabled */
+                                  kPORT_PassiveFilterDisable,
+                                  /* Low drive strength is configured */
+                                  kPORT_LowDriveStrength,
+                                  /* Pin is configured as PTE19 */
+                                  kPORT_MuxAsGpio};
     /* PORTE19 (pin 17) is configured as PTE19 */
-    PORT_SetPinMux(BOARD_INITPINS_E2_PORT, BOARD_INITPINS_E2_PIN, kPORT_MuxAsGpio);
-
-    PORTE->PCR[19] = ((PORTE->PCR[19] &
-                       /* Mask bits to zero which are setting */
-                       (~(PORT_PCR_SRE_MASK | PORT_PCR_ISF_MASK)))
-
-                      /* Slew Rate Enable: Slow slew rate is configured on the corresponding pin, if the pin is
-                       * configured as a digital output. */
-                      | PORT_PCR_SRE(kPORT_SlowSlewRate));
+    PORT_SetPinConfig(BOARD_INITPINS_E2_PORT, BOARD_INITPINS_E2_PIN, &E2);
 
     /* PORTE2 (pin 3) is configured as PTE2 */
     PORT_SetPinMux(BOARD_INITPINS_E8_PORT, BOARD_INITPINS_E8_PIN, kPORT_MuxAsGpio);
+
+    PORTE->PCR[2] = ((PORTE->PCR[2] &
+                      /* Mask bits to zero which are setting */
+                      (~(PORT_PCR_PS_MASK | PORT_PCR_PE_MASK | PORT_PCR_ISF_MASK)))
+
+                     /* Pull Select: Internal pulldown resistor is enabled on the corresponding pin, if the
+                      * corresponding PE field is set. */
+                     | (uint32_t)(kPORT_PullDown));
 
     /* PORTE21 (pin 19) is configured as PTE21 */
     PORT_SetPinMux(BOARD_INITPINS_D4_PORT, BOARD_INITPINS_D4_PIN, kPORT_MuxAsGpio);
@@ -548,14 +564,38 @@ void BOARD_InitPins(void)
     /* PORTE3 (pin 4) is configured as PTE3 */
     PORT_SetPinMux(BOARD_INITPINS_E7_PORT, BOARD_INITPINS_E7_PIN, kPORT_MuxAsGpio);
 
+    PORTE->PCR[3] = ((PORTE->PCR[3] &
+                      /* Mask bits to zero which are setting */
+                      (~(PORT_PCR_PS_MASK | PORT_PCR_PE_MASK | PORT_PCR_ISF_MASK)))
+
+                     /* Pull Select: Internal pulldown resistor is enabled on the corresponding pin, if the
+                      * corresponding PE field is set. */
+                     | (uint32_t)(kPORT_PullDown));
+
     /* PORTE30 (pin 27) is configured as PTE30 */
     PORT_SetPinMux(BOARD_INITPINS_D7_PORT, BOARD_INITPINS_D7_PIN, kPORT_MuxAsGpio);
 
     /* PORTE31 (pin 28) is configured as PTE31 */
     PORT_SetPinMux(BOARD_INITPINS_E1_PORT, BOARD_INITPINS_E1_PIN, kPORT_MuxAsGpio);
 
+    PORTE->PCR[31] = ((PORTE->PCR[31] &
+                       /* Mask bits to zero which are setting */
+                       (~(PORT_PCR_PS_MASK | PORT_PCR_PE_MASK | PORT_PCR_ISF_MASK)))
+
+                      /* Pull Select: Internal pulldown resistor is enabled on the corresponding pin, if the
+                       * corresponding PE field is set. */
+                      | (uint32_t)(kPORT_PullDown));
+
     /* PORTE6 (pin 7) is configured as PTE6 */
     PORT_SetPinMux(BOARD_INITPINS_E6_PORT, BOARD_INITPINS_E6_PIN, kPORT_MuxAsGpio);
+
+    PORTE->PCR[6] = ((PORTE->PCR[6] &
+                      /* Mask bits to zero which are setting */
+                      (~(PORT_PCR_PS_MASK | PORT_PCR_PE_MASK | PORT_PCR_ISF_MASK)))
+
+                     /* Pull Select: Internal pulldown resistor is enabled on the corresponding pin, if the
+                      * corresponding PE field is set. */
+                     | (uint32_t)(kPORT_PullDown));
 
     SIM->SOPT5 = ((SIM->SOPT5 &
                    /* Mask bits to zero which are setting */

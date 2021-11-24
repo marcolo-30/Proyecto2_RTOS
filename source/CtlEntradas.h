@@ -43,4 +43,6 @@ void CEnt_Configure_evento(CEnt_Control *cesp, char entrada, char activo, char t
 
 void CEnt_Configure_alarma(CEnt_Control *cesp, char entrada, char activa);
 
+char readPort();
+
 #endif
