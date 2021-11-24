@@ -51,6 +51,7 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 	char num [2]={0,0};
 	char num_pulso[4]={0,0,0,0};
 	int i=0,j=0,k=0;
+	 unsigned short ancho_pulso;
 
 	 while (SI)
 	    {
@@ -86,7 +87,8 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 									                            char activo,
 									                            char tipo,
 									                            unsigned short ancho)*/
-									CEnt_Configure_evento(&c_entrada,mensaje.msg[2]-48,mensaje.msg[3]-48,mensaje.msg[3], atoi(num_pulso));
+									ancho_pulso=atoi(num_pulso);
+									CEnt_Configure_evento(&c_entrada,mensaje.msg[2]-48,mensaje.msg[3]-48,mensaje.msg[3], ancho_pulso );
 								break;
 
 								case 'A':
@@ -100,13 +102,17 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 							break;
 
 						case 'S':
-							//c_sal_mensaje.tipo=CSAL_TMSG_FORZADO;
+
+							c_sal_mensaje.tipo=CSAL_TMSG_FORZADO;
+
 							switch(mensaje.msg[1]){
 												case 'E':
 													i=3;
 													while(mensaje.msg[i] != 110){ //110 corresponde a n en ascci
 														switch(mensaje.msg[i]){
 															case 'E':
+
+																c_sal_mensaje.tipo=CSAL_TMSG_EVENTO;
 
 																j=i+2;
 																k=0;
@@ -119,13 +125,13 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 																		j++;k++;
 																}
 																inter_Enc.e.retardo = atoi(ret);
-																//c_sal_mensaje.tipo=CSAL_TMSG_EVENTO;
+
 																i=j+1;
 
 																break;
 
 															case 'F':
-
+																 c_sal_mensaje.tipo=CSAL_TMSG_RTC ;
 																 inter_Enc.banderas  |=   CSAL_B_ON_MOMENTO;
 																 j=i+1;
 
@@ -211,7 +217,7 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 																 }
 
 																i++;
-																//c_sal_mensaje.tipo=CSAL_TMSG_RTC ;
+
 																break;
 
 															default:
@@ -224,17 +230,30 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 													//c_sal_mensaje.v.forzado.salida=mensaje.msg[2]-48;
 													//c_sal_mensaje.v.forzado.encender= 1;
 													//CSal_Envie_mensaje(&c_salidas, &c_sal_mensaje, 0);
-													c_sal_mensaje.tipo=0;
-													CSal_Configure_encendido(&c_salidas, mensaje.msg[2]-48, &inter_Enc);
+
+													//(cola de salidas, puerto de salida a encender, condiciones de encendido)
+
+													if(c_sal_mensaje.tipo != CSAL_TMSG_FORZADO){
+
+														CSal_Configure_encendido(&c_salidas, mensaje.msg[2]-48, &inter_Enc);
+													}
+													else {
+
+														c_sal_mensaje.v.forzado.salida=mensaje.msg[2]-48;
+														c_sal_mensaje.v.forzado.encender= SI;
+														CSal_Envie_mensaje(&c_salidas, &c_sal_mensaje, 0);
+													}
+
 													break;
 
 
 												case 'A':
+
 													i=3;
 													while(mensaje.msg[i] != 110){ //110 corresponde a n en ascci
 														switch(mensaje.msg[i]){
 															case 'E':
-
+																c_sal_mensaje.tipo=CSAL_TMSG_EVENTO;
 																j=i+2;
 																k=0;
 																inter_Apa.banderas  |=   CSAL_B_ON_EVENTO;
@@ -251,7 +270,7 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 																break;
 
 															case 'F':
-
+																c_sal_mensaje.tipo=CSAL_TMSG_RTC ;
 																 inter_Apa.banderas  |=   CSAL_B_ON_MOMENTO;
 																 j=i+1;
 
@@ -361,11 +380,23 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 													}
 													i++;
 
-													c_sal_mensaje.tipo=1;
-													c_sal_mensaje.v.forzado.salida=mensaje.msg[2]-48;
-													c_sal_mensaje.v.forzado.encender= 0;
-													CSal_Envie_mensaje(&c_salidas, &c_sal_mensaje, 0);
-			                                       // CSal_Configure_apagado(&c_salidas, mensaje.msg[2]-45, &inter_Apa);
+//													c_sal_mensaje.tipo=1;
+//													c_sal_mensaje.v.forzado.salida=mensaje.msg[2]-48;
+//													c_sal_mensaje.v.forzado.encender= 0;
+//													CSal_Envie_mensaje(&c_salidas, &c_sal_mensaje, 0);
+//			                                       // CSal_Configure_apagado(&c_salidas, mensaje.msg[2]-45, &inter_Apa);
+
+													if(c_sal_mensaje.tipo != CSAL_TMSG_FORZADO){
+
+														CSal_Configure_encendido(&c_salidas, mensaje.msg[2]-48, &inter_Enc);
+													}
+													else {
+
+														c_sal_mensaje.v.forzado.salida=mensaje.msg[2]-48;
+														c_sal_mensaje.v.forzado.encender= NO;
+														CSal_Envie_mensaje(&c_salidas, &c_sal_mensaje, 0);
+													}
+
 			                                        break;
 
 							}

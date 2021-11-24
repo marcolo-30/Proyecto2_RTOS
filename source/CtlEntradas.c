@@ -91,14 +91,6 @@ void CEnt_Procese (CEnt_Control *cesp)
 
 
 
-      if(GPIO_ReadPinInput(GPIOE,BOARD_INITPINS_E2_PIN)==1){// si hay alguno en alto que encienda el led rojo
-
-    	  GPIO_WritePinOutput(GPIOE,BOARD_INITPINS_LED_RED_PIN,1);
-      }
-      else{
-      	GPIO_WritePinOutput(GPIOE,BOARD_INITPINS_LED_RED_PIN,0);
-
-      }
       xSemaphoreTake(cesp->mutex_cfg, portMAX_DELAY);
       for (cep = cesp->t_cfg, i =  0, bit_mask = 0x01, alarmas = 0, eventos = 0;
            i < CENT_NUM_ENTRADAS;
