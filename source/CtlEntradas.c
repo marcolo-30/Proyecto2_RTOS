@@ -13,7 +13,7 @@ extern char LCDB;
 
 #define PUERTO          GPIOE
 
-#define LONG_STACK      (configMINIMAL_STACK_SIZE + 50)
+#define LONG_STACK      (configMINIMAL_STACK_SIZE + 100)
 
 #define PERIODO_1SEG    400
 
@@ -60,9 +60,10 @@ void CEnt_Procese (CEnt_Control *cesp)
    char i;
    CEnt_Cfg_entrada *cep;
    unsigned char  bit_mask,
+   	   	   	   	  eventos,
                   alarmas;
 
-   char DataPos;
+   char aux_subida;
 
    uint32_t bits_maskSalida;
    CSal_Mensaje msj;
@@ -99,7 +100,7 @@ void CEnt_Procese (CEnt_Control *cesp)
 
       }
       xSemaphoreTake(cesp->mutex_cfg, portMAX_DELAY);
-      for (cep = cesp->t_cfg, i =  0, bit_mask = 0x01, alarmas = 0;
+      for (cep = cesp->t_cfg, i =  0, bit_mask = 0x01, alarmas = 0, eventos = 0;
            i < CENT_NUM_ENTRADAS;
            ++cep, ++i, bit_mask <<= 1)
          {
@@ -112,11 +113,16 @@ void CEnt_Procese (CEnt_Control *cesp)
             switch (cep->tipo)
                {
                case CENT_TIPO_SUBIDA:
-                  if ( !(anterior & bit_mask) && (actual & bit_mask) )
+            	   // anterior = 0000 0000 & 0000 1000 = 0000 0000 = 0x00
+            	   // actual = 0000 1000 & 0000 1000 = 0000 1000 = 0x08
+                  //if ( !(anterior & bit_mask) && (actual & bit_mask) )
+            	   aux_subida = !(anterior & bit_mask) && (actual & bit_mask);
+            	   if(aux_subida)
                      {
-                     msj.tipo = CSAL_TMSG_EVENTO;
-                     msj.v.entrada = i;
-                     CSal_Envie_mensaje(&c_salidas, &msj, portMAX_DELAY);
+//                     msj.tipo = CSAL_TMSG_EVENTO;
+//                     msj.v.entrada = i;
+//                     CSal_Envie_mensaje(&c_salidas, &msj, portMAX_DELAY);
+            		 eventos |= bit_mask;
                      if (cep->banderas & CENT_B_ALARMA)
                         alarmas |= bit_mask;
                      };
@@ -169,12 +175,22 @@ void CEnt_Procese (CEnt_Control *cesp)
       anterior = actual;   /* El valor actual del puerto se vuelve el siguiente valor anterior */
       for (i =  0, bit_mask = 0x01;
            i < CENT_NUM_ENTRADAS;
-           ++i, bit_mask <<= 1)
+           ++i, bit_mask <<= 1){
+
+    	  if (eventos & bit_mask)
+
+    	  {
+    		  msj.tipo = CSAL_TMSG_EVENTO;
+    		  msj.v.entrada = i;
+    		  CSal_Envie_mensaje(&c_salidas, &msj, portMAX_DELAY);
+    	  };
+
          if (alarmas & bit_mask)
             {
             txt_alarma[1] = '0' + i;
        //     Com_Tx_texto(&c_comunicacion, txt_alarma, portMAX_DELAY);
             };
+      }
       };
    };
 
@@ -214,8 +230,8 @@ void CEnt_Configure_alarma (CEnt_Control *cesp,
    xSemaphoreGive(cesp->mutex_cfg);
    };
 
-char readPort(){
-	char port = 0;
+unsigned char readPort(){
+	unsigned char port = 0;
 	for(int i = 0; i < 8 ; i++){
 		if (i== 0 ){
 			if(GPIO_ReadPinInput(GPIOE,BOARD_INITPINS_E1_PIN)==1){

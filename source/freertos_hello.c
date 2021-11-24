@@ -195,6 +195,9 @@ int main(void)
 //        PRINTF("Task creation failed!.\r\n");
 //        while (1);
 //    }
+    if(CEnt_Inicie  (&c_entrada , tskIDLE_PRIORITY + 5)){
+    	PRINTF("No fue posible inicializar el modulo ENTRADAS !.\r\n");
+    };
 
     if (xTaskCreate(comRxUart_task, "comRxUart_task", configMINIMAL_STACK_SIZE + 10, NULL,  comRxUart_task_PRIORITY, NULL) != pdPASS)
     {
@@ -211,9 +214,7 @@ int main(void)
     	PRINTF("No fue posible inicializar el modulo salidas !.\r\n");
     };
 
-    if(CEnt_Inicie  (&c_entrada , tskIDLE_PRIORITY + 3)){
-    	PRINTF("No fue posible inicializar el modulo ENTRADAS !.\r\n");
-    };
+
 
     Interprete_Inicie (&inter_cont,tskIDLE_PRIORITY + 3);
     mutexLCD = xSemaphoreCreateMutex();

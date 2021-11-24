@@ -110,8 +110,9 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 
 																j=i+2;
 																k=0;
+
 																inter_Enc.banderas  |=   CSAL_B_ON_EVENTO;
-																inter_Enc.e.entrada = mensaje.msg [i+1] ;
+																inter_Enc.e.entrada = mensaje.msg[4]-48;
 
 																while(mensaje.msg[j]!=59){ // 59 corresponde a ;
 																		ret[k]=mensaje.msg[j];
@@ -219,12 +220,12 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 													   }
 
 													}
-													//c_sal_mensaje.tipo=1;
+
 													//c_sal_mensaje.v.forzado.salida=mensaje.msg[2]-48;
 													//c_sal_mensaje.v.forzado.encender= 1;
 													//CSal_Envie_mensaje(&c_salidas, &c_sal_mensaje, 0);
-
-													CSal_Configure_encendido(&c_salidas,  &c_sal_mensaje, &inter_Enc);
+													c_sal_mensaje.tipo=0;
+													CSal_Configure_encendido(&c_salidas, mensaje.msg[2]-48, &inter_Enc);
 													break;
 
 
