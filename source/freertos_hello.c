@@ -159,6 +159,7 @@ int main(void)
 {
 
 	uart_config_t config;
+
 	BOARD_InitPins();
     BOARD_BootClockRUN();
     BOARD_InitDebugConsole();

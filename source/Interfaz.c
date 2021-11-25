@@ -175,7 +175,7 @@ void Interfaz_Procese (Interfaz_Control *iucp){
 							                            xSemaphoreGive(mutexLCD);
 							                            //vTaskDelay( lcd_time );
 
-							                            if( xQueueReceive (ColaInterfaz,&dato_cola,portMAX_DELAY) == pdPASS ){
+							                            if( xQueueReceive (ColaInterfaz,&dato_cola,waiting_time) == pdPASS ){
 							                                                                                    switch (dato_cola){
 							                                                                                        case 'A':
 
@@ -270,6 +270,14 @@ void Interfaz_Procese (Interfaz_Control *iucp){
 							                                                                                                break;
 							                                                                                        }
 							                                                                                    }
+							else {
+														xSemaphoreTake(mutexLCD, portMAX_DELAY);
+														write_second_line();
+														write_line("  Time Out !!!  ");
+														xSemaphoreGive(mutexLCD);
+														break;
+													}
+
 
 							break;
 
@@ -337,7 +345,7 @@ void Interfaz_Procese (Interfaz_Control *iucp){
                         write_second_line();
                         write_line("   A.On B.Off   ");
                         xSemaphoreGive(mutexLCD);
-                        if( xQueueReceive (ColaInterfaz,&dato_cola,portMAX_DELAY) == pdPASS ){
+                        if( xQueueReceive (ColaInterfaz,&dato_cola,waiting_time) == pdPASS ){
                               switch (dato_cola){
                                 case 'A':
                                     xSemaphoreTake(mutexLCD, portMAX_DELAY);
@@ -413,6 +421,13 @@ void Interfaz_Procese (Interfaz_Control *iucp){
                                     xSemaphoreGive(mutexLCD);
                                 break;
                             }
+
+                        }else{
+                        	xSemaphoreTake(mutexLCD, portMAX_DELAY);
+							write_second_line();
+							write_line("  Time Out !!!  ");
+							xSemaphoreGive(mutexLCD);
+							break;
                         }
                     break;
 
