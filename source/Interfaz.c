@@ -12,6 +12,7 @@
 #include "pin_mux.h"
 #include "CtlSalidas.h"
 #include "Interprete.h"
+#include "Varios.h"
 
 extern Interprete_Control inter_cont;
 extern Interprete_mensaje inter_mensaje;
@@ -44,6 +45,7 @@ void Interfaz_Procese (Interfaz_Control *iucp){
 		 xLastWakeTime = xTaskGetTickCount();
 
 		 const TickType_t lcd_time = 1000/ portTICK_PERIOD_MS;
+		 const TickType_t waiting_time = 10000/ portTICK_PERIOD_MS;
 
 		 xSemaphoreTake(mutexLCD, portMAX_DELAY);
 		 init_LCD_display();
@@ -72,8 +74,10 @@ void Interfaz_Procese (Interfaz_Control *iucp){
 						write_second_line();
 						write_line("A. Fecha B. Hora");
 						xSemaphoreGive(mutexLCD);
-						//vTaskDelay( lcd_time );
-						if( xQueueReceive (ColaInterfaz,&dato_cola,portMAX_DELAY) == pdPASS )
+						//vTaskDelay( waiting_time );
+						//break;
+
+						if( xQueueReceive (ColaInterfaz,&dato_cola,waiting_time) == pdPASS ){
 							switch (dato_cola){
 										    	 	 case 'A':
 
@@ -101,7 +105,8 @@ void Interfaz_Procese (Interfaz_Control *iucp){
 										 		    			} else {
 										 		    				xSemaphoreTake(mutexLCD, portMAX_DELAY);
 																						write_second_line();
-																						write_line("guardando info..");
+																						write_line("guardando info ");
+																						write_character(dato_cola);
 																						xSemaphoreGive(mutexLCD);//guarda en la cola
 										 		    			}
 
@@ -151,6 +156,14 @@ void Interfaz_Procese (Interfaz_Control *iucp){
 													 								xSemaphoreGive(mutexLCD);
 													 		break;
 							}
+						}
+						else {
+							xSemaphoreTake(mutexLCD, portMAX_DELAY);
+							write_second_line();
+							write_line("  Time Out !!!  ");
+							xSemaphoreGive(mutexLCD);
+							break;
+						}
 						break;
 
 						case'B':
@@ -174,7 +187,7 @@ void Interfaz_Procese (Interfaz_Control *iucp){
 							                                                                                            xSemaphoreGive(mutexLCD);
 							                                                                                            //vTaskDelay( lcd_time );
 							                                                                                            if( xQueueReceive (ColaInterfaz,&dato_cola,portMAX_DELAY) == pdPASS ){
-							                                                                                           // 	if (dato_cola == '0' || '1' || '2' || '3' || '4' || '5' || '6' || '7' ){
+							                                                                                            	if (dato_cola >= 48 && dato_cola<=55 ){
 							                                                                                                        xSemaphoreTake(mutexLCD, portMAX_DELAY);
 							                                                                                                        write_second_line();
 							                                                                                                        write_line("Encendiendo Pto ");
@@ -193,15 +206,15 @@ void Interfaz_Procese (Interfaz_Control *iucp){
 
 							                                    //-----------------------------------------------------------------------------------------------------------------
 							                                                                                                        break;
-//							                                                                                                   }
-//
-//							                                                                                                    else {
-//							                                                                                                        xSemaphoreTake(mutexLCD, portMAX_DELAY);
-//							                                                                                                        write_second_line();
-//							                                                                                                        write_line("Puerto no valido");
-//							                                                                                                        xSemaphoreGive(mutexLCD);
-//							                                                                                                        break;
-//							                                                                                                    }
+							                                                                                                   }
+
+							                                                                                                    else {
+							                                                                                                        xSemaphoreTake(mutexLCD, portMAX_DELAY);
+							                                                                                                        write_second_line();
+							                                                                                                        write_line("Puerto no valido");
+							                                                                                                        xSemaphoreGive(mutexLCD);
+							                                                                                                        break;
+							                                                                                                    }
 
 							                                                                                                //envia el mensaje de encender puerto;
 							                                                                                            }
@@ -218,7 +231,7 @@ void Interfaz_Procese (Interfaz_Control *iucp){
 							                                                                                                xSemaphoreGive(mutexLCD);
 							                                                                                                //vTaskDelay( lcd_time );
 							                                                                                                if( xQueueReceive (ColaInterfaz,&dato_cola,portMAX_DELAY) == pdPASS ){
-							                                                                                                	//if (dato_cola == '0' || '1' || '2' || '3' || '4' || '5' || '6' || '7' ){
+							                                                                                                	if (dato_cola >= 48 && dato_cola<=55 ){
 							                                                                                                            xSemaphoreTake(mutexLCD, portMAX_DELAY);
 							                                                                                                            write_second_line();
 							                                                                                                            write_line("Apagando Puerto ");
@@ -234,17 +247,17 @@ void Interfaz_Procese (Interfaz_Control *iucp){
 
 
 							                                                                                                            break;
-							                                                                                                       // }
+							                                                                                                        }
 
-//							                                                                                                        else {
-//							                                                                                                            xSemaphoreTake(mutexLCD, portMAX_DELAY);
-//							                                                                                                            write_second_line();
-//							                                                                                                            write_line("Puerto no valido");
-//							                                                                                                            xSemaphoreGive(mutexLCD);
-//							                                                                                                            break;
-//							                                                                                                        }
+							                                                                                                        else {
+							                                                                                                            xSemaphoreTake(mutexLCD, portMAX_DELAY);
+							                                                                                                            write_second_line();
+							                                                                                                            write_line("Puerto no valido");
+							                                                                                                            xSemaphoreGive(mutexLCD);
+							                                                                                                            break;
+							                                                                                                        }
 
-							                                                                                                    //envia el mensaje de encender puerto;
+							                                                                                                   // envia el mensaje de encender puerto;
 							                                                                                                }
 
 							                                                                                                break;
@@ -267,7 +280,7 @@ void Interfaz_Procese (Interfaz_Control *iucp){
                         write_second_line();
                         write_line("   A.On B.Off   ");
                         xSemaphoreGive(mutexLCD);
-                        if( xQueueReceive (ColaInterfaz,&dato_cola,portMAX_DELAY) == pdPASS ){
+                        if( xQueueReceive (ColaInterfaz,&dato_cola,waiting_time) == pdPASS ){
                               switch (dato_cola){
                                 case 'A':
                                     xSemaphoreTake(mutexLCD, portMAX_DELAY);
@@ -306,6 +319,13 @@ void Interfaz_Procese (Interfaz_Control *iucp){
                                     xSemaphoreGive(mutexLCD);
                                 break;
                             }
+                        }
+                        else{
+                        	xSemaphoreTake(mutexLCD, portMAX_DELAY);
+                        								write_second_line();
+                        								write_line("  Time Out !!!  ");
+                        								xSemaphoreGive(mutexLCD);
+                        								break;
                         }
 
                     break;

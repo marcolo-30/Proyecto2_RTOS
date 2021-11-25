@@ -12,6 +12,7 @@
 #include "CtlEntradas.h"
 #include "CtlSalidas.h"
 #include "pin_mux.h"
+#include "Varios.h"
 
 #define LONG_STACK      (configMINIMAL_STACK_SIZE + 166)
 #define MAX_MENSAJES    30
@@ -405,7 +406,7 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 
 						case'M':
 
-							switch(mensaje.msg[3]){
+							switch(mensaje.msg[1]){
 								//Activo o inactivo
 
 							                case 'A':

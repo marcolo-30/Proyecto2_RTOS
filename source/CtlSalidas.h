@@ -10,6 +10,7 @@
 #include "Varios.h"
 #include "portmacro.h"
 
+
 #define CSAL_NUM_SALIDAS        8
 
 typedef struct CSal_Evento CSal_Evento;

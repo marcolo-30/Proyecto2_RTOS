@@ -8,7 +8,7 @@
 //extern Com_Control c_comunicacion;
 //extern
 //#define PUERTO
-
+extern QueueHandle_t ColaMonitoreo;
 
 uint32_t PIN_SALIDAS [8] = {16,13,11,10,7,6,4,0};
 
@@ -297,15 +297,31 @@ void CSal_Procese (CSal_Control *cscp)
                {
                txt[1] = '0' + i;
                txt[2] = '1';
+
                //Com_Tx_texto(&c_comunicacion, txt, portMAX_DELAY);
+               for(i=0;i<5;i++){
+
+            	   xQueueSend(ColaMonitoreo,(void *)txt[i],0);
+               }
+
                };
             if (bits_off & (1 << i))
                {
                txt[1] = '0' + i;
                txt[2] = '0';
+
                //Com_Tx_texto(&c_comunicacion, txt, portMAX_DELAY);
+               for(i=0;i<5;i++){
+
+				    xQueueSend(ColaMonitoreo,(void *)txt[i],0);
+
+               }
                };
             };
+
+
+
+
          };
       };
    };

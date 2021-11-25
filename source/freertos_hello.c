@@ -102,6 +102,7 @@ QueueHandle_t ColaRx;
 QueueHandle_t ColaKeyboard;
 QueueHandle_t ColaTx;
 QueueHandle_t ColaInterfaz;
+QueueHandle_t ColaMonitoreo;
 SemaphoreHandle_t mutexLCD;
 
 
@@ -224,6 +225,7 @@ int main(void)
     ColaKeyboard = xQueueCreate( 64, sizeof(char));
     ColaTx = xQueueCreate( 64, sizeof(char));
     ColaInterfaz = xQueueCreate( 10, sizeof(char));
+    ColaMonitoreo = xQueueCreate( 64, sizeof(char));
 
     if(ColaRx==NULL){
     	while(1);
@@ -244,6 +246,7 @@ static void comRxUart_task(void *pvParameters){
 	int i=0;
 	int j=0;
 	uint8_t keyboard_data = 'a';
+	char dato_monitoreo;
 	const TickType_t oneSecond = 1000 / portTICK_PERIOD_MS;
 	uint8_t uart_data ;
 
@@ -258,6 +261,16 @@ static void comRxUart_task(void *pvParameters){
 			UART_EnableInterrupts(PROJ_UART, kUART_TxDataRegEmptyInterruptEnable );
 			//UART_WriteBlocking(PROJ_UART, &keyboard_data, 1);
 		}
+
+
+		if(uxQueueMessagesWaiting(ColaMonitoreo)){
+					xQueueReceive(ColaMonitoreo,&dato_monitoreo,0);
+					xQueueSend(ColaTx,(void *)&dato_monitoreo,0);
+					UART_EnableInterrupts(PROJ_UART, kUART_TxDataRegEmptyInterruptEnable );
+					//UART_WriteBlocking(PROJ_UART, &keyboard_data, 1);
+				}
+
+
 		// Si hay mensajes en la cola de recepcion deberiamos hacer append al array
 
 			 if(uxQueueMessagesWaiting(ColaRx)){
