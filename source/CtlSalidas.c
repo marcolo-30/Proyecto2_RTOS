@@ -101,7 +101,7 @@ void CSal_Procese (CSal_Control *cscp)
    CSal_Mensaje msj;
    CSal_Cfg_salida *csp;
    uint32_t  bits_on,
-             bits_off;
+             bits_off,bits_on_mon,bits_off_mon;
 
    char modo_monitoreo;
 
@@ -119,7 +119,7 @@ void CSal_Procese (CSal_Control *cscp)
       if ( xQueueReceive(cscp->cola_ev, &msj, portMAX_DELAY) != pdTRUE )
          continue;
 
-      bits_on = bits_off = 0;
+      bits_on = bits_off = bits_on_mon = bits_off_mon = 0;
       switch (msj.tipo)
          {
          case CSAL_TMSG_EVENTO:
@@ -147,6 +147,7 @@ void CSal_Procese (CSal_Control *cscp)
                            {
                            sp->estado = SAL_E_OFF;
                            bits_off |= (1 << PIN_SALIDAS[i]);
+                           bits_off_mon |= (1 << i);
                            };
                         };
                      break;
@@ -173,6 +174,7 @@ void CSal_Procese (CSal_Control *cscp)
                               else
                               sp->estado = SAL_E_ON;
                            bits_on |= (1 << PIN_SALIDAS[i]);
+                           bits_on_mon |= (1 << i);
                            };
                         };
                      break;
@@ -196,11 +198,13 @@ void CSal_Procese (CSal_Control *cscp)
                   sp->estado = SAL_E_ON;
                xSemaphoreGive(cscp->mutex_cfg);
                bits_on |= (1 << PIN_SALIDAS[msj.v.forzado.salida]);
+               bits_on_mon |= (1 << msj.v.forzado.salida);
                }
                else
                { /* Se apaga */
                sp->estado = SAL_E_OFF;
                bits_off |= (1 << PIN_SALIDAS[msj.v.forzado.salida]);
+               bits_off_mon |= (1 << msj.v.forzado.salida);
                };
 			break;
 		 case CSAL_TMSG_RTC:
@@ -218,6 +222,7 @@ void CSal_Procese (CSal_Control *cscp)
                         {
                         sp->estado = SAL_E_OFF;
                         bits_off |= (1 << PIN_SALIDAS[i]);
+                        bits_off_mon |= (1 << i);
                         };
                      break;
                   case SAL_E_OFF:
@@ -233,6 +238,7 @@ void CSal_Procese (CSal_Control *cscp)
                            else
                            sp->estado = SAL_E_ON;
                         bits_on |= (1 << PIN_SALIDAS[i]);
+                        bits_on_mon |= (1 << i);
                         };
                      break;
                   };
@@ -253,6 +259,7 @@ void CSal_Procese (CSal_Control *cscp)
                         {
                         sp->estado = SAL_E_OFF;
                         bits_off |= (1 << PIN_SALIDAS[i]);
+                        bits_off_mon |= (1 << i);
                         };
                      break;
                   case SAL_E_ON_RETARDADO:
@@ -267,6 +274,7 @@ void CSal_Procese (CSal_Control *cscp)
                            else
                            sp->estado = SAL_E_ON;
                         bits_on |= (1 << PIN_SALIDAS[i]);
+                        bits_on_mon |= (1 << i );
                         };
                      break;
                   };
@@ -293,7 +301,7 @@ void CSal_Procese (CSal_Control *cscp)
          txt[4] = '\0';
          for (i =  0; i < CSAL_NUM_SALIDAS; ++i)
             {
-            if (bits_on & (1 << i))
+            if (bits_on_mon & (1 << i))
                {
                txt[1] = '0' + i;
                txt[2] = '1';
@@ -301,11 +309,11 @@ void CSal_Procese (CSal_Control *cscp)
                //Com_Tx_texto(&c_comunicacion, txt, portMAX_DELAY);
                for(i=0;i<5;i++){
 
-            	   xQueueSend(ColaMonitoreo,(void *)txt[i],0);
+            	   xQueueSend(ColaMonitoreo,(void *)&txt[i],0);
                }
 
                };
-            if (bits_off & (1 << i))
+            if (bits_off_mon & (1 << i))
                {
                txt[1] = '0' + i;
                txt[2] = '0';
@@ -313,7 +321,7 @@ void CSal_Procese (CSal_Control *cscp)
                //Com_Tx_texto(&c_comunicacion, txt, portMAX_DELAY);
                for(i=0;i<5;i++){
 
-				    xQueueSend(ColaMonitoreo,(void *)txt[i],0);
+				    xQueueSend(ColaMonitoreo,(void *)&txt[i],0);
 
                }
                };

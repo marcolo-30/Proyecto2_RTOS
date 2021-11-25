@@ -221,11 +221,11 @@ int main(void)
     mutexLCD = xSemaphoreCreateMutex();
 
 
-    ColaRx = xQueueCreate( 64, sizeof(char));
-    ColaKeyboard = xQueueCreate( 64, sizeof(char));
-    ColaTx = xQueueCreate( 64, sizeof(char));
+    ColaRx = xQueueCreate( 10, sizeof(char));
+    ColaKeyboard = xQueueCreate( 10, sizeof(char));
+    ColaTx = xQueueCreate( 10, sizeof(char));
     ColaInterfaz = xQueueCreate( 10, sizeof(char));
-    ColaMonitoreo = xQueueCreate( 64, sizeof(char));
+    ColaMonitoreo = xQueueCreate( 10, sizeof(char));
 
     if(ColaRx==NULL){
     	while(1);
@@ -263,12 +263,12 @@ static void comRxUart_task(void *pvParameters){
 		}
 
 
-		if(uxQueueMessagesWaiting(ColaMonitoreo)){
-					xQueueReceive(ColaMonitoreo,&dato_monitoreo,0);
-					xQueueSend(ColaTx,(void *)&dato_monitoreo,0);
-					UART_EnableInterrupts(PROJ_UART, kUART_TxDataRegEmptyInterruptEnable );
-					//UART_WriteBlocking(PROJ_UART, &keyboard_data, 1);
-				}
+//		if(uxQueueMessagesWaiting(ColaMonitoreo)){
+//					xQueueReceive(ColaMonitoreo,&dato_monitoreo,0);
+//					xQueueSend(ColaTx,(void *)&dato_monitoreo,0);
+//					UART_EnableInterrupts(PROJ_UART, kUART_TxDataRegEmptyInterruptEnable );
+//					//UART_WriteBlocking(PROJ_UART, &keyboard_data, 1);
+//				}
 
 
 		// Si hay mensajes en la cola de recepcion deberiamos hacer append al array
