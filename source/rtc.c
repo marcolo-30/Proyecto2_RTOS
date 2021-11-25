@@ -14,6 +14,7 @@
 //#define RAPIDISIMO
 
 extern SemaphoreHandle_t mutexLCD;
+extern SemaphoreHandle_t mutexRTC;
 int hora_ones,hora_tens,minuto_ones,minuto_tens,anio_ones,anio_tens,anio_hundreds,anio_thousands,mes_ones,mes_tens,dia_ones,dia_tens;
 
 static   uint8_t diasMes[]={31,29,31,30,31,30,31,31,30,31,30,31}; //Array para los dias del mes
@@ -48,11 +49,11 @@ void RTC_Procese (RTC_Control *cRtcsp){
 	while (SI){
 
 		vTaskDelayUntil( &xLastWakeTime, one_second );
-
+		 xSemaphoreTake(mutexRTC, portMAX_DELAY);
 	//	cRtcsp->TiempoRTC.h.segundo++;
-	//	(cRtcsp->TiempoRTC.h.segundo)+=60;  //Prueba con minutos
-	//	(cRtcsp->TiempoRTC.h.minuto)+=60; //Prueba con horas
-		(cRtcsp->TiempoRTC.h.hora)+=24;
+		(cRtcsp->TiempoRTC.h.segundo)+=60;  //Prueba con minutos
+//		(cRtcsp->TiempoRTC.h.minuto)+=60; //Prueba con horas
+//		(cRtcsp->TiempoRTC.h.hora)+=24;
 
 		//Just for Show RTC is working
 //		if(state==0){
@@ -86,7 +87,7 @@ void RTC_Procese (RTC_Control *cRtcsp){
 
 		//-------------------- Días ------------------------------------------
 		//Los días dependen del mes actual
-		if((cRtcsp->TiempoRTC.f.dia)>diasMes[(cRtcsp->TiempoRTC.f.mes)-1]){//Enero es el mes 1 pero es el que yo quiero en la posicion 0
+		if((cRtcsp->TiempoRTC.f.dia)>=diasMes[(cRtcsp->TiempoRTC.f.mes)-1]){//Enero es el mes 1 pero es el que yo quiero en la posicion 0
 			cRtcsp->TiempoRTC.f.mes ++;
 			cRtcsp->TiempoRTC.f.dia = 1;
 			RTC_envie(cRtcsp);
@@ -94,7 +95,7 @@ void RTC_Procese (RTC_Control *cRtcsp){
 
 		//-------------------- Mes ------------------------------------------
 		//Los días dependen del mes actual
-		if((cRtcsp->TiempoRTC.f.dia)>diasMes[(cRtcsp->TiempoRTC.f.mes)-1]){//Enero es el mes 1 pero es el que yo quiero en la posicion 0
+		if((cRtcsp->TiempoRTC.f.dia)>=diasMes[(cRtcsp->TiempoRTC.f.mes)-1]){//Enero es el mes 1 pero es el que yo quiero en la posicion 0
 			cRtcsp->TiempoRTC.f.mes ++;
 			cRtcsp->TiempoRTC.f.dia = 1;
 			RTC_envie(cRtcsp);
@@ -113,7 +114,7 @@ void RTC_Procese (RTC_Control *cRtcsp){
 			else
 				diasMes[1] = 28;
 		}
-
+		 xSemaphoreGive(mutexRTC);
 	}
 }
 
@@ -156,5 +157,12 @@ void RTC_envie(RTC_Control *cRtcsp){
     }
 
     xSemaphoreGive(mutexLCD);
+
+}
+
+
+void RTC_configure(RTC_Control *cRtcsp){
+
+
 
 }

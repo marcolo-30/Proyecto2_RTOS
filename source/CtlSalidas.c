@@ -116,7 +116,7 @@ void CSal_Procese (CSal_Control *cscp)
    
    while (SI)
       {
-      if ( xQueueReceive(cscp->cola_ev, &msj, portMAX_DELAY) != pdTRUE )
+   //   if ( xQueueReceive(cscp->cola_ev, &msj, portMAX_DELAY) != pdTRUE )
          continue;
 
       bits_on = bits_off = bits_on_mon = bits_off_mon = 0;

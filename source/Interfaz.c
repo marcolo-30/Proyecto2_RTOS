@@ -13,11 +13,12 @@
 #include "CtlSalidas.h"
 #include "Interprete.h"
 #include "Varios.h"
+#include "rtc.h"
 
 extern Interprete_Control inter_cont;
 extern Interprete_mensaje inter_mensaje;
 extern CSal_Control c_salidas;
-
+extern RTC_Control c_rtc;
 //Interfaz de Usuario
 
 #define LONG_STACK      (configMINIMAL_STACK_SIZE + 166)
@@ -27,7 +28,7 @@ extern CSal_Control c_salidas;
 
 extern QueueHandle_t ColaInterfaz;
 extern SemaphoreHandle_t mutexLCD;
-
+extern SemaphoreHandle_t mutexRTC;
 char Interfaz_Inicie (Interfaz_Control *iucp, UBaseType_t prioridad){
 
 	if ( xTaskCreate(Interfaz_Procese, "Interfaz Usuario", LONG_STACK, iucp,
@@ -52,8 +53,11 @@ void Interfaz_Procese (Interfaz_Control *iucp){
 		 xSemaphoreGive(mutexLCD);
 
 		 int lcd_render_state=0;
-
+		 char dato_fecha[8];
+		 char aux[4];
+		 char dato_hora[8];
 		 char dato_cola;
+		 int i,anio;
 
 	    for( ;; )
 	    {
@@ -85,15 +89,32 @@ void Interfaz_Procese (Interfaz_Control *iucp){
 										 		    	write_second_line();
 										 		    	write_line("Introduzca Fecha");
 										 		    	xSemaphoreGive(mutexLCD);
+										 		    	i=0;anio=0;
 										 		    	while (true){
 
 										 		    		if( xQueueReceive (ColaInterfaz,&dato_cola,portMAX_DELAY) == pdPASS )
 										 		    			if(dato_cola=='#'){
-										 		    				xSemaphoreTake(mutexLCD, portMAX_DELAY);
-																	write_second_line();
-																	write_line("Aceptado enviado");
-																	xSemaphoreGive(mutexLCD);
+//										 		    				xSemaphoreTake(mutexLCD, portMAX_DELAY);
+//																	write_second_line();
+//																	write_line("Aceptado enviado");
+//																	xSemaphoreGive(mutexLCD);
+										 		    				xSemaphoreTake(mutexRTC, portMAX_DELAY);
+																	//Hay que crear un mutex para esta informacion//
+										 		    				aux[0]=dato_fecha[0];
+										 		    				aux[1]=dato_fecha[1];
+										 		    				aux[2]=dato_fecha[2];
+										 		    				aux[3]=dato_fecha[3];
+										 		    				anio=atoi(aux);
+										 		    				c_rtc.TiempoRTC.f.anio=anio;
 
+										 		    				aux[0]=dato_fecha[0];
+																	aux[1]=dato_fecha[1];
+																	c_rtc.TiempoRTC.f.mes=atoi(aux);
+
+																	aux[0]=dato_fecha[2];
+																	aux[1]=dato_fecha[3];
+																	c_rtc.TiempoRTC.f.dia=atoi(aux);
+																	 xSemaphoreGive(mutexRTC);
 										 		    				//envia la funcion de configuracion de fecha
 										 		    				break;
 										 		    			}else if(dato_cola=='*'){
@@ -108,6 +129,8 @@ void Interfaz_Procese (Interfaz_Control *iucp){
 																						write_line("guardando info ");
 																						write_character(dato_cola);
 																						xSemaphoreGive(mutexLCD);//guarda en la cola
+																						dato_fecha[i]=dato_cola;
+																						i++;
 										 		    			}
 
 										 		    		}
@@ -121,15 +144,25 @@ void Interfaz_Procese (Interfaz_Control *iucp){
 															write_second_line();
 															write_line("Introduzca Hora ");
 															xSemaphoreGive(mutexLCD);
-
+															i=0;
 															 while (true){
 
 																	if( xQueueReceive (ColaInterfaz,&dato_cola,portMAX_DELAY) == pdPASS )
 																		if(dato_cola=='#'){
-																			xSemaphoreTake(mutexLCD, portMAX_DELAY);
-																			write_second_line();
-																			write_line("Aceptado enviado");
-																			xSemaphoreGive(mutexLCD);
+//																			xSemaphoreTake(mutexLCD, portMAX_DELAY);
+//																			write_second_line();
+//																			write_line("Aceptado enviado");
+//																			xSemaphoreGive(mutexLCD);
+																			xSemaphoreTake(mutexRTC, portMAX_DELAY);
+																			aux[0]=dato_hora[0];
+																			aux[1]=dato_hora[1];
+
+																			c_rtc.TiempoRTC.h.hora=atoi(aux);
+
+																			aux[0]=dato_hora[2];
+																			aux[1]=dato_hora[3];
+																			c_rtc.TiempoRTC.h.minuto=atoi(aux);
+																			xSemaphoreGive(mutexRTC);
 
 																			//envia la funcion de configuracion de fecha
 																			break;
@@ -144,6 +177,8 @@ void Interfaz_Procese (Interfaz_Control *iucp){
 																								write_second_line();
 																								write_line("guardando info..");
 																								xSemaphoreGive(mutexLCD);//guarda en la cola
+																								dato_hora[i]=dato_cola;
+																								i++;
 																		}
 
 																	}

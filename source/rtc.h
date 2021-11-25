@@ -29,4 +29,6 @@ void RTC_Procese (RTC_Control *cRtcsp);
 
 void RTC_envie(RTC_Control *cRtcsp);
 
+void RTC_Configure(RTC_Control *cRtcsp, RTC_Control);
+
 #endif /* RTC_H_ */

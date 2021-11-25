@@ -102,9 +102,9 @@ QueueHandle_t ColaRx;
 QueueHandle_t ColaKeyboard;
 QueueHandle_t ColaTx;
 QueueHandle_t ColaInterfaz;
-QueueHandle_t ColaMonitoreo;
+//QueueHandle_t ColaMonitoreo;
 SemaphoreHandle_t mutexLCD;
-
+SemaphoreHandle_t mutexRTC;
 
 
 char dato_rx;
@@ -159,7 +159,6 @@ int main(void)
 {
 
 	uart_config_t config;
-
 	BOARD_InitPins();
     BOARD_BootClockRUN();
     BOARD_InitDebugConsole();
@@ -220,13 +219,13 @@ int main(void)
 
     Interprete_Inicie (&inter_cont,tskIDLE_PRIORITY + 3);
     mutexLCD = xSemaphoreCreateMutex();
-
+    mutexRTC = xSemaphoreCreateMutex();
 
     ColaRx = xQueueCreate( 10, sizeof(char));
     ColaKeyboard = xQueueCreate( 10, sizeof(char));
     ColaTx = xQueueCreate( 10, sizeof(char));
     ColaInterfaz = xQueueCreate( 10, sizeof(char));
-    ColaMonitoreo = xQueueCreate( 10, sizeof(char));
+   // ColaMonitoreo = xQueueCreate( 10, sizeof(char));
 
     if(ColaRx==NULL){
     	while(1);

@@ -296,8 +296,7 @@ extern unsigned int __bss_section_table_end;
 // Sets up a simple runtime environment and initializes the C/C++
 // library.
 //*****************************************************************************
-__attribute__ ((section(".after_vectors.reset")))
-void ResetISR(void) {
+__attribute__ ((section(".after_vectors.reset")))void ResetISR(void) {
 
     // Disable interrupts
     __asm volatile ("cpsid i");
