@@ -86,7 +86,7 @@ void RTC_Procese (RTC_Control *cRtcsp){
 
 		//-------------------- Días ------------------------------------------
 		//Los días dependen del mes actual
-		if((cRtcsp->TiempoRTC.f.dia)>diasMes[(cRtcsp->TiempoRTC.f.mes)-1]){//Enero es el mes 1 pero es el que yo quiero en la posicion 0
+		if((cRtcsp->TiempoRTC.f.dia)>=diasMes[(cRtcsp->TiempoRTC.f.mes)-1]){//Enero es el mes 1 pero es el que yo quiero en la posicion 0
 			cRtcsp->TiempoRTC.f.mes ++;
 			cRtcsp->TiempoRTC.f.dia = 1;
 			RTC_envie(cRtcsp);
@@ -94,7 +94,7 @@ void RTC_Procese (RTC_Control *cRtcsp){
 
 		//-------------------- Mes ------------------------------------------
 		//Los días dependen del mes actual
-		if((cRtcsp->TiempoRTC.f.dia)>diasMes[(cRtcsp->TiempoRTC.f.mes)-1]){//Enero es el mes 1 pero es el que yo quiero en la posicion 0
+		if((cRtcsp->TiempoRTC.f.dia)>=diasMes[(cRtcsp->TiempoRTC.f.mes)-1]){//Enero es el mes 1 pero es el que yo quiero en la posicion 0
 			cRtcsp->TiempoRTC.f.mes ++;
 			cRtcsp->TiempoRTC.f.dia = 1;
 			RTC_envie(cRtcsp);

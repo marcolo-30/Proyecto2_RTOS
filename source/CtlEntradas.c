@@ -9,7 +9,7 @@
 //extern Com_Control c_comunicacion;
 extern CSal_Control c_salidas;
 extern char LCDB;
-
+extern QueueHandle_t ColaAlarmas;
 
 #define PUERTO          GPIOE
 
@@ -180,6 +180,9 @@ void CEnt_Procese (CEnt_Control *cesp)
          if (alarmas & bit_mask)
             {
             txt_alarma[1] = '0' + i;
+            for(i=0;i<4;i++){
+          		xQueueSend(ColaAlarmas,(void *)&txt_alarma[i],0);
+             }
        //     Com_Tx_texto(&c_comunicacion, txt_alarma, portMAX_DELAY);
             };
       }
