@@ -94,10 +94,13 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 
 								case 'A':
 
-									//CEnt_Configure_alarma(CEnt_Control *cesp, char entrada, char activa);
-								break;
+								CEnt_Configure_alarma(&c_entrada,mensaje.msg[2]-48,mensaje.msg[3]);
+
+
+									break;
+
 								default:
-								break;
+									break;
 
 							}
 							break;
@@ -417,6 +420,7 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 							                    break;
 									};
 							 break;
+
 
 						default:
 							break;

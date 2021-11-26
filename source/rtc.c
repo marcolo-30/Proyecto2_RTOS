@@ -161,8 +161,3 @@ void RTC_envie(RTC_Control *cRtcsp){
 }
 
 
-void RTC_configure(RTC_Control *cRtcsp){
-
-
-
-}

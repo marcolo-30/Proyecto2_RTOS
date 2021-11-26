@@ -102,7 +102,8 @@ QueueHandle_t ColaRx;
 QueueHandle_t ColaKeyboard;
 QueueHandle_t ColaTx;
 QueueHandle_t ColaInterfaz;
-//QueueHandle_t ColaMonitoreo;
+QueueHandle_t ColaMonitoreo;
+QueueHandle_t ColaAlarmas;
 SemaphoreHandle_t mutexLCD;
 SemaphoreHandle_t mutexRTC;
 
@@ -196,7 +197,7 @@ int main(void)
 //        PRINTF("Task creation failed!.\r\n");
 //        while (1);
 //    }
-    if(CEnt_Inicie  (&c_entrada , tskIDLE_PRIORITY + 5)){
+    if(CEnt_Inicie  (&c_entrada , tskIDLE_PRIORITY + 3)){
     	PRINTF("No fue posible inicializar el modulo ENTRADAS !.\r\n");
     };
 
@@ -225,11 +226,15 @@ int main(void)
     ColaKeyboard = xQueueCreate( 10, sizeof(char));
     ColaTx = xQueueCreate( 10, sizeof(char));
     ColaInterfaz = xQueueCreate( 10, sizeof(char));
-   // ColaMonitoreo = xQueueCreate( 10, sizeof(char));
+    ColaMonitoreo = xQueueCreate( 10, sizeof(char));
+    ColaAlarmas = xQueueCreate( 10, sizeof(char));
+
+
 
     if(ColaRx==NULL){
     	while(1);
     };
+
 
     vTaskStartScheduler();
     for (;;){
@@ -247,6 +252,7 @@ static void comRxUart_task(void *pvParameters){
 	int j=0;
 	uint8_t keyboard_data = 'a';
 	char dato_monitoreo;
+	char dato_alarmas;
 	const TickType_t oneSecond = 1000 / portTICK_PERIOD_MS;
 	uint8_t uart_data ;
 
@@ -263,13 +269,19 @@ static void comRxUart_task(void *pvParameters){
 		}
 
 
-//		if(uxQueueMessagesWaiting(ColaMonitoreo)){
-//					xQueueReceive(ColaMonitoreo,&dato_monitoreo,0);
-//					xQueueSend(ColaTx,(void *)&dato_monitoreo,0);
-//					UART_EnableInterrupts(PROJ_UART, kUART_TxDataRegEmptyInterruptEnable );
-//					//UART_WriteBlocking(PROJ_UART, &keyboard_data, 1);
-//				}
+		if(uxQueueMessagesWaiting(ColaMonitoreo)){
+					xQueueReceive(ColaMonitoreo,&dato_monitoreo,0);
+					xQueueSend(ColaTx,(void *)&dato_monitoreo,0);
+					UART_EnableInterrupts(PROJ_UART, kUART_TxDataRegEmptyInterruptEnable );
+					//UART_WriteBlocking(PROJ_UART, &keyboard_data, 1);
+				}
 
+		if(uxQueueMessagesWaiting(ColaAlarmas)){
+							xQueueReceive(ColaAlarmas,&dato_alarmas,0);
+							xQueueSend(ColaTx,(void *)&dato_alarmas,0);
+							UART_EnableInterrupts(PROJ_UART, kUART_TxDataRegEmptyInterruptEnable );
+							//UART_WriteBlocking(PROJ_UART, &keyboard_data, 1);
+						}
 
 		// Si hay mensajes en la cola de recepcion deberiamos hacer append al array
 

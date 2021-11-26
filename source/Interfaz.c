@@ -54,11 +54,15 @@ void Interfaz_Procese (Interfaz_Control *iucp){
 
 		 int lcd_render_state=0;
 		 char dato_fecha[8];
-		 char aux[4];
+		 char anio[4];
+		 char mes[2];
+		 char dia[2];
+		 char hora[2];
+		 char min[2];
 		 char dato_hora[8];
 		 char dato_cola;
-		 int i,anio;
-
+		 int i;
+		uint16_t A;
 	    for( ;; )
 	    {
 
@@ -89,31 +93,32 @@ void Interfaz_Procese (Interfaz_Control *iucp){
 										 		    	write_second_line();
 										 		    	write_line("Introduzca Fecha");
 										 		    	xSemaphoreGive(mutexLCD);
-										 		    	i=0;anio=0;
+										 		    	i=0;
+
 										 		    	while (true){
 
 										 		    		if( xQueueReceive (ColaInterfaz,&dato_cola,portMAX_DELAY) == pdPASS )
 										 		    			if(dato_cola=='#'){
-//										 		    				xSemaphoreTake(mutexLCD, portMAX_DELAY);
-//																	write_second_line();
-//																	write_line("Aceptado enviado");
-//																	xSemaphoreGive(mutexLCD);
-										 		    				xSemaphoreTake(mutexRTC, portMAX_DELAY);
+//
 																	//Hay que crear un mutex para esta informacion//
-										 		    				aux[0]=dato_fecha[0];
-										 		    				aux[1]=dato_fecha[1];
-										 		    				aux[2]=dato_fecha[2];
-										 		    				aux[3]=dato_fecha[3];
-										 		    				anio=atoi(aux);
-										 		    				c_rtc.TiempoRTC.f.anio=anio;
+										 		    				anio[0]=dato_fecha[0];
+										 		    				anio[1]=dato_fecha[1];
+										 		    				anio[2]=dato_fecha[2];
+										 		    				anio[3]=dato_fecha[3];
+										 		    				A=atoi(anio);
 
-										 		    				aux[0]=dato_fecha[0];
-																	aux[1]=dato_fecha[1];
-																	c_rtc.TiempoRTC.f.mes=atoi(aux);
 
-																	aux[0]=dato_fecha[2];
-																	aux[1]=dato_fecha[3];
-																	c_rtc.TiempoRTC.f.dia=atoi(aux);
+										 		    				mes[0]=dato_fecha[4];
+																	mes[1]=dato_fecha[5];
+
+
+																	dia[0]=dato_fecha[6];
+																	dia[1]=dato_fecha[7];
+
+																	xSemaphoreTake(mutexRTC, portMAX_DELAY);
+																	c_rtc.TiempoRTC.f.anio=(int)A;
+																	c_rtc.TiempoRTC.f.mes=atoi(mes);
+																	c_rtc.TiempoRTC.f.dia=atoi(dia);
 																	 xSemaphoreGive(mutexRTC);
 										 		    				//envia la funcion de configuracion de fecha
 										 		    				break;
@@ -153,15 +158,16 @@ void Interfaz_Procese (Interfaz_Control *iucp){
 //																			write_second_line();
 //																			write_line("Aceptado enviado");
 //																			xSemaphoreGive(mutexLCD);
+
+																			hora[0]=dato_hora[0];
+																			hora[1]=dato_hora[1];
+
+																			min[0]=dato_hora[2];
+																			min[1]=dato_hora[3];
+
 																			xSemaphoreTake(mutexRTC, portMAX_DELAY);
-																			aux[0]=dato_hora[0];
-																			aux[1]=dato_hora[1];
-
-																			c_rtc.TiempoRTC.h.hora=atoi(aux);
-
-																			aux[0]=dato_hora[2];
-																			aux[1]=dato_hora[3];
-																			c_rtc.TiempoRTC.h.minuto=atoi(aux);
+																																						c_rtc.TiempoRTC.h.hora=atoi(hora);
+																			c_rtc.TiempoRTC.h.minuto=atoi(min);
 																			xSemaphoreGive(mutexRTC);
 
 																			//envia la funcion de configuracion de fecha
@@ -389,66 +395,61 @@ void Interfaz_Procese (Interfaz_Control *iucp){
                                     write_second_line();
 							        write_line("Digite el puerto");
                                     xSemaphoreGive(mutexLCD);
-                                    if( xQueueReceive (ColaInterfaz,&dato_cola,portMAX_DELAY) == pdPASS ){
-                                       // if (dato_cola=='1'){
-                                            xSemaphoreTake(mutexLCD, portMAX_DELAY);
-                                            write_second_line();
-                                            write_line(" Alarma config  ");
-                                            xSemaphoreGive(mutexLCD);
+										if( xQueueReceive (ColaInterfaz,&dato_cola,portMAX_DELAY) == pdPASS ){
+										   // if (dato_cola=='1'){
+												xSemaphoreTake(mutexLCD, portMAX_DELAY);
+												write_second_line();
+												write_line(" Alarma config  ");
+												xSemaphoreGive(mutexLCD);
 
-                                            inter_mensaje.msg[0]='A';
-											inter_mensaje.msg[1]= dato_cola;
-											inter_mensaje.msg[2]='n';
+												inter_mensaje.msg[0]='E';
+												inter_mensaje.msg[1]='A';
+												inter_mensaje.msg[2]=dato_cola;
+												inter_mensaje.msg[3]='A';
+												inter_mensaje.msg[4]='n';
+
+
+												Interprete_envie_mensaje(&inter_cont,&inter_mensaje,portMAX_DELAY);
+
+
+												break;
+
+												}
+
+                                break;
+
+
+                                case 'B':
+
+								xSemaphoreTake(mutexLCD, portMAX_DELAY);
+								write_second_line();
+								write_line("Desactiva Alarma");
+								write_second_line();
+								write_line("Digite el puerto");
+								xSemaphoreGive(mutexLCD);
+									if( xQueueReceive (ColaInterfaz,&dato_cola,portMAX_DELAY) == pdPASS ){
+									   // if (dato_cola=='1'){
+											xSemaphoreTake(mutexLCD, portMAX_DELAY);
+											write_second_line();
+											write_line("Alarma desconfig");
+											xSemaphoreGive(mutexLCD);
+
+											inter_mensaje.msg[0]='E';
+											inter_mensaje.msg[1]='A';
+											inter_mensaje.msg[2]=dato_cola;
+											inter_mensaje.msg[3]='I';
+											inter_mensaje.msg[4]='n';
 
 
 											Interprete_envie_mensaje(&inter_cont,&inter_mensaje,portMAX_DELAY);
 
 
-                                            break;
-//                                        }
-//
-//                                        else {
-//                                            xSemaphoreTake(mutexLCD, portMAX_DELAY);
-//                                            write_second_line();
-//                                            write_line("Puerto no valido");
-//                                            xSemaphoreGive(mutexLCD);
-//                                            break;
-//                                        }
+											break;
 
+											}
 
-                                }
+							break;
 
-
-                                break;
-                                case 'B':
-                                    xSemaphoreTake(mutexLCD, portMAX_DELAY);
-                                    write_second_line();
-                                    write_line("Desactiva Alarma");
-                                    write_second_line();
-							        write_line("Digite el puerto");
-                                    xSemaphoreGive(mutexLCD);
-                                    if( xQueueReceive (ColaInterfaz,&dato_cola,portMAX_DELAY) == pdPASS ){
-                                                                                    if (dato_cola=='1'){
-                                                                                        xSemaphoreTake(mutexLCD, portMAX_DELAY);
-                                                                                        write_second_line();
-                                                                                        write_line("Apagando Puerto ");
-                                                                                        xSemaphoreGive(mutexLCD);
-                                                                                        break;
-                                                                                    }
-
-                                                                                    else {
-                                                                                        xSemaphoreTake(mutexLCD, portMAX_DELAY);
-                                                                                        write_second_line();
-                                                                                        write_line("Puerto no valido");
-                                                                                        xSemaphoreGive(mutexLCD);
-                                                                                        break;
-                                                                                    }
-
-
-                                                                            }
-
-
-                                break;
                                 default:
                                     xSemaphoreTake(mutexLCD, portMAX_DELAY);
                                     write_second_line();
