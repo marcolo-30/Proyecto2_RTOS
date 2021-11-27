@@ -42,12 +42,14 @@ char RTC_Inicie (RTC_Control *cRtcsp,
 void RTC_Procese (RTC_Control *cRtcsp){
 	TickType_t xLastWakeTime;
 	xLastWakeTime = xTaskGetTickCount();
+	int flag_dato;
 
 	const TickType_t one_second = 1000/ portTICK_PERIOD_MS;
 
 	while (SI){
 
 		vTaskDelayUntil( &xLastWakeTime, one_second );
+		 flag_dato=0;
 
 	//	cRtcsp->TiempoRTC.h.segundo++;
 	//	(cRtcsp->TiempoRTC.h.segundo)+=60;  //Prueba con minutos
@@ -67,21 +69,24 @@ void RTC_Procese (RTC_Control *cRtcsp){
 		if((cRtcsp->TiempoRTC.h.segundo)>59){
 			cRtcsp->TiempoRTC.h.minuto ++;
 			cRtcsp->TiempoRTC.h.segundo=0;
-			RTC_envie(cRtcsp);
+			flag_dato=1;
+
 		}
 
 		//--------------------Minutos------------------------------------------
 		if((cRtcsp->TiempoRTC.h.minuto)>59){
 			cRtcsp->TiempoRTC.h.hora ++;
 			cRtcsp->TiempoRTC.h.minuto=0;
-			RTC_envie(cRtcsp);
+			flag_dato=1;
+
 		}
 
 		//--------------------Horas------------------------------------------
 		if((cRtcsp->TiempoRTC.h.hora)>23){
 			cRtcsp->TiempoRTC.f.dia ++;
 			cRtcsp->TiempoRTC.h.hora=0;
-			RTC_envie(cRtcsp);
+			flag_dato=1;
+
 		}
 
 		//-------------------- Días ------------------------------------------
@@ -89,7 +94,8 @@ void RTC_Procese (RTC_Control *cRtcsp){
 		if((cRtcsp->TiempoRTC.f.dia)>=diasMes[(cRtcsp->TiempoRTC.f.mes)-1]){//Enero es el mes 1 pero es el que yo quiero en la posicion 0
 			cRtcsp->TiempoRTC.f.mes ++;
 			cRtcsp->TiempoRTC.f.dia = 1;
-			RTC_envie(cRtcsp);
+			flag_dato=1;
+
 		}
 
 		//-------------------- Mes ------------------------------------------
@@ -97,14 +103,15 @@ void RTC_Procese (RTC_Control *cRtcsp){
 		if((cRtcsp->TiempoRTC.f.dia)>=diasMes[(cRtcsp->TiempoRTC.f.mes)-1]){//Enero es el mes 1 pero es el que yo quiero en la posicion 0
 			cRtcsp->TiempoRTC.f.mes ++;
 			cRtcsp->TiempoRTC.f.dia = 1;
-			RTC_envie(cRtcsp);
+			flag_dato=1;
 		}
 
 		// ------------------ Anios------------------------------------------
 		if( cRtcsp->TiempoRTC.f.mes > 12 ){
 			cRtcsp->TiempoRTC.f.anio ++;
 			 cRtcsp->TiempoRTC.f.mes = 1;
-			 RTC_envie(cRtcsp);
+			 flag_dato=1;
+
 
 			//Biciesto Library
 			int bis =cRtcsp->TiempoRTC.f.anio;
@@ -112,6 +119,11 @@ void RTC_Procese (RTC_Control *cRtcsp){
 				diasMes[1] = 29;
 			else
 				diasMes[1] = 28;
+		}
+
+		if(flag_dato){
+			RTC_envie(cRtcsp);
+			flag_dato=0;
 		}
 
 	}
@@ -147,8 +159,8 @@ void RTC_envie(RTC_Control *cRtcsp){
     char trama[16]={anio_thousands+48,anio_hundreds+48,anio_tens+48,anio_ones+48,'/',mes_tens+48,mes_ones+48,'/',dia_tens+48,dia_ones+48,' ',hora_tens+48,hora_ones+48,':',minuto_tens+48,minuto_ones+48};
 
 
-
-   xSemaphoreTake(mutexLCD, portMAX_DELAY);
+    //Mirar si el semaforo esta disponible, si no pues no entra
+   if( xSemaphoreTake(mutexLCD, ( TickType_t ) 10)==pdTRUE ){
    home();
     for (int i=0;i<=16;i++){
 
@@ -156,5 +168,6 @@ void RTC_envie(RTC_Control *cRtcsp){
     }
 
     xSemaphoreGive(mutexLCD);
+   };
 
 }
