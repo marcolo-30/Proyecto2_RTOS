@@ -14,6 +14,7 @@
 //#define RAPIDISIMO
 
 extern SemaphoreHandle_t mutexLCD;
+extern SemaphoreHandle_t mutexRTC;
 int hora_ones,hora_tens,minuto_ones,minuto_tens,anio_ones,anio_tens,anio_hundreds,anio_thousands,mes_ones,mes_tens,dia_ones,dia_tens;
 
 static   uint8_t diasMes[]={31,29,31,30,31,30,31,31,30,31,30,31}; //Array para los dias del mes
@@ -50,11 +51,11 @@ void RTC_Procese (RTC_Control *cRtcsp){
 
 		vTaskDelayUntil( &xLastWakeTime, one_second );
 		 flag_dato=0;
-
+		 xSemaphoreTake(mutexRTC, portMAX_DELAY);
 	//	cRtcsp->TiempoRTC.h.segundo++;
-	//	(cRtcsp->TiempoRTC.h.segundo)+=60;  //Prueba con minutos
+		(cRtcsp->TiempoRTC.h.segundo)+=60;  //Prueba con minutos
 	//	(cRtcsp->TiempoRTC.h.minuto)+=60; //Prueba con horas
-		(cRtcsp->TiempoRTC.h.hora)+=24;
+	//	(cRtcsp->TiempoRTC.h.hora)+=24;
 
 		//Just for Show RTC is working
 //		if(state==0){
@@ -120,7 +121,7 @@ void RTC_Procese (RTC_Control *cRtcsp){
 			else
 				diasMes[1] = 28;
 		}
-
+		 xSemaphoreGive(mutexRTC);
 		if(flag_dato){
 			RTC_envie(cRtcsp);
 			flag_dato=0;
