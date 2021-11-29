@@ -52,7 +52,8 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 	char num [2]={0,0};
 	char num_pulso[4]={0,0,0,0};
 	int i=0,j=0,k=0;
-	 unsigned short ancho_pulso;
+	unsigned short ancho_pulso;
+
 
 	 while (SI)
 	    {
@@ -83,11 +84,7 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 										num_pulso[2]=mensaje.msg[6];
 										num_pulso[3]=mensaje.msg[7];
 									}
-									/*CEnt_Configure_evento (CEnt_Control *cesp,
-									                            char entrada,
-									                            char activo,
-									                            char tipo,
-									                            unsigned short ancho)*/
+
 									ancho_pulso=atoi(num_pulso);
 									CEnt_Configure_evento(&c_entrada,mensaje.msg[2]-48,mensaje.msg[3]-48,mensaje.msg[3], ancho_pulso );
 								break;
@@ -108,7 +105,9 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 
 							switch(mensaje.msg[1]){
 												case 'E':
+
 													i=3;
+
 													while(mensaje.msg[i] != 110){ //110 corresponde a n en ascci
 														switch(mensaje.msg[i]){
 															case 'E':
@@ -251,14 +250,15 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 												case 'A':
 
 													i=3;
+
 													while(mensaje.msg[i] != 110){ //110 corresponde a n en ascci
 														switch(mensaje.msg[i]){
 															case 'E':
 																c_sal_mensaje.tipo=CSAL_TMSG_EVENTO;
 																j=i+2;
 																k=0;
-																inter_Apa.banderas  |=   CSAL_B_ON_EVENTO;
-																inter_Apa.e.entrada = mensaje.msg [i+1] ;
+																inter_Apa.banderas  |=   CSAL_B_OFF_EVENTO;
+																inter_Apa.e.entrada = mensaje.msg [4]-48 ;
 
 																while(mensaje.msg[j]!=59){ // 59 corresponde a ;
 																		ret[k]=mensaje.msg[j];
@@ -353,7 +353,7 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 																	 }
 
 																 }
-
+																i++;
 
 																break;
 
@@ -387,9 +387,9 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 //													CSal_Envie_mensaje(&c_salidas, &c_sal_mensaje, 0);
 //			                                       // CSal_Configure_apagado(&c_salidas, mensaje.msg[2]-45, &inter_Apa);
 
-													if(c_sal_mensaje.tipo != CSAL_TMSG_FORZADO){
+													if(c_sal_mensaje.tipo != CSAL_TMSG_FORZADO ){
 
-														CSal_Configure_encendido(&c_salidas, mensaje.msg[2]-48, &inter_Enc);
+														CSal_Configure_apagado(&c_salidas, mensaje.msg[2]-48, &inter_Apa);
 													}
 													else {
 

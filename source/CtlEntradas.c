@@ -97,7 +97,7 @@ void CEnt_Procese (CEnt_Control *cesp)
            ++cep, ++i, bit_mask <<= 1)
          {
     	   PUERTO->PDIR;
-    	   bits_maskSalida = 0x0000; // Nuevo
+    	 //  bits_maskSalida = 0x0000; // Nuevo
     	   bits_maskSalida |= (1 << PIN_Entradas[i]);// Nuevo
     	   //bits_maskSalida=bit_mask;
     	  if (cep->banderas & CENT_B_ACTIVO)
@@ -121,14 +121,13 @@ void CEnt_Procese (CEnt_Control *cesp)
                   break;
                case CENT_TIPO_BAJADA:
               //    if ( (anterior & bit_mask) && !(actual & bit_mask) )
-            	    if ( (anterior & bits_maskSalida) && !(actual & bits_maskSalida) )
-                     {
-                     msj.tipo = CSAL_TMSG_EVENTO;
-                     msj.v.entrada = i;
-                     CSal_Envie_mensaje(&c_salidas, &msj, portMAX_DELAY);
-                     if (cep->banderas & CENT_B_ALARMA)
-                        alarmas |= bit_mask;
-                     };
+            	   aux_subida = (anterior & bit_mask) && !(actual & bit_mask);
+				   if(aux_subida)
+						{
+  					   eventos |= bit_mask;
+						if (cep->banderas & CENT_B_ALARMA)
+							  alarmas |= bit_mask;
+						}
                   break;
                case CENT_TIPO_PULSO:
                   //if (anterior & bit_mask)

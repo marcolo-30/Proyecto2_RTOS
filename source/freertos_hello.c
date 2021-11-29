@@ -231,9 +231,10 @@ int main(void)
     ColaAlarmas = xQueueCreate( 10, sizeof(char));
 
 
-    if(ColaRx==NULL){
+    if(ColaRx==NULL || ColaKeyboard==NULL || ColaTx==NULL || ColaInterfaz==NULL || ColaMonitoreo==NULL || ColaAlarmas==NULL || mutexLCD==NULL || mutexRTC==NULL){
     	while(1);
     };
+
 
     vTaskStartScheduler();
     for (;;){
@@ -257,6 +258,8 @@ static void comRxUart_task(void *pvParameters){
 
 	for (;;)
 	    {
+
+
 
 		// Esto es para revisar la cola del teclado e imprimirla no more
 		if(uxQueueMessagesWaiting(ColaKeyboard)){
