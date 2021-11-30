@@ -53,6 +53,7 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 	char num_pulso[4]={0,0,0,0};
 	int i=0,j=0,k=0;
 	unsigned short ancho_pulso;
+	int llevo_msg=0;
 
 	 while (SI)
 	    {
@@ -72,7 +73,9 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 			xQueueReceive(interp_contp->cola_com, &mensaje, portMAX_DELAY);
 			switch (mensaje.msg[0]){
 
+
 						case 'E':
+
 
 							switch(mensaje.msg[1]){
 								case 'E':
@@ -99,7 +102,7 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 							break;
 
 						case 'S':
-
+							llevo_msg=0;
 							c_sal_mensaje.tipo=CSAL_TMSG_FORZADO;
 
 							switch(mensaje.msg[1]){
@@ -108,6 +111,12 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 													i=3;
 
 													while(mensaje.msg[i] != 110){ //110 corresponde a n en ascci
+
+														if(llevo_msg){
+															CSal_Configure_encendido(&c_salidas, mensaje.msg[2]-48, &inter_Enc);
+															llevo_msg=0;
+														}
+
 														switch(mensaje.msg[i]){
 															case 'E':
 
@@ -118,6 +127,7 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 
 																inter_Enc.banderas  |=   CSAL_B_ON_EVENTO;
 																inter_Enc.e.entrada = mensaje.msg[4]-48;
+																llevo_msg=1;
 
 																while(mensaje.msg[j]!=59){ // 59 corresponde a ;
 																		ret[k]=mensaje.msg[j];
@@ -155,6 +165,7 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 									                                        inter_Enc.m.t.h.minuto = atoi(num);
 									                                        j=j+9;
 									                                        i=j;
+									                                        llevo_msg=1;
 																	 		break;
 
 																	 	case'M':
@@ -171,6 +182,7 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 																			inter_Enc.m.t.h.minuto = atoi(num);
 																			j=j+7;
 																			i=j;
+																			llevo_msg=1;
 																	 		break;
 
 																	 	case 'S':
@@ -187,6 +199,7 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 									                                        inter_Enc.m.t.h.minuto = atoi(num);
 									                                        j=j+6;
 									                                        i=j;
+									                                        llevo_msg=1;
 
 																	 		break;
 
@@ -200,6 +213,7 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 																			inter_Enc.m.t.h.minuto = atoi(num);
 																			j=j+5;
 																			i=j;
+																			llevo_msg=1;
 																			break;
 
 																		case 'H':
@@ -209,6 +223,7 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 																			inter_Enc.m.t.h.minuto = atoi(num);
 																			j=j+3;
 																			i=j;
+																			llevo_msg=1;
 																			break;
 
 																	 }
@@ -251,6 +266,12 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 													i=3;
 
 													while(mensaje.msg[i] != 110){ //110 corresponde a n en ascci
+
+														if(llevo_msg){
+															CSal_Configure_encendido(&c_salidas, mensaje.msg[2]-48, &inter_Enc);
+															llevo_msg=0;
+														}
+
 														switch(mensaje.msg[i]){
 															case 'E':
 																c_sal_mensaje.tipo=CSAL_TMSG_EVENTO;
@@ -264,7 +285,7 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 																		j++;k++;
 																}
 																inter_Apa.e.retardo = atoi(ret);
-
+																llevo_msg=1;
 																i=j+1;
 
 																break;
@@ -295,6 +316,7 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 																			inter_Apa.m.t.h.minuto = atoi(num);
 																			j=j+9;
 																			i=j;
+																			llevo_msg=1;
 																			break;
 
 																		case 'M':
@@ -311,6 +333,7 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 																			inter_Apa.m.t.h.minuto = atoi(num);
 																			j=j+7;
 																			i=j;
+																			llevo_msg=1;
 																			break;
 
 																		case 'S':
@@ -327,6 +350,7 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 																			inter_Apa.m.t.h.minuto = atoi(num);
 																			j=j+6;
 																			i=j;
+																			llevo_msg=1;
 																			break;
 
 																		case 'D':
@@ -339,6 +363,7 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 																			inter_Apa.m.t.h.minuto = atoi(num);
 																			j=j+5;
 																			i=j;
+																			llevo_msg=1;
 																			break;
 																		case 'H':
 																			inter_Apa.m.tipo = CSAL_TP_M_HORA;
@@ -347,6 +372,7 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 																			inter_Apa.m.t.h.minuto = atoi(num);
 																			j=j+3;
 																			i=j;
+																			llevo_msg=1;
 
 																			break;
 																	 }
