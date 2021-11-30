@@ -54,7 +54,6 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 	int i=0,j=0,k=0;
 	unsigned short ancho_pulso;
 
-
 	 while (SI)
 	    {
 
@@ -142,17 +141,17 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 																	 	case 'A':
 
 									                                        inter_Enc.m.tipo = CSAL_TP_M_ANIO;
-									                                        num[0]=mensaje.msg[j+2];
-									                                        num[1]=mensaje.msg[j+3];
+									                                        num[0]=mensaje.msg[j+1];
+									                                        num[1]=mensaje.msg[j+2];
 									                                        inter_Enc.m.t.f.mes =atoi(num);
-									                                        num[0]=mensaje.msg[j+4];
-									                                        num[1]=mensaje.msg[j+5];
+									                                        num[0]=mensaje.msg[j+3];
+									                                        num[1]=mensaje.msg[j+4];
 									                                        inter_Enc.m.t.f.dia = atoi(num);
-									                                        num[0]=mensaje.msg[j+6];
-									                                        num[1]=mensaje.msg[j+7];
+									                                        num[0]=mensaje.msg[j+5];
+									                                        num[1]=mensaje.msg[j+6];
 									                                        inter_Enc.m.t.h.hora = atoi(num);
-									                                        num[0]=mensaje.msg[j+8];
-									                                        num[1]=mensaje.msg[j+9];
+									                                        num[0]=mensaje.msg[j+7];
+									                                        num[1]=mensaje.msg[j+8];
 									                                        inter_Enc.m.t.h.minuto = atoi(num);
 									                                        j=j+9;
 									                                        i=j;
@@ -161,14 +160,14 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 																	 	case'M':
 
 																			inter_Enc.m.tipo = CSAL_TP_M_MES;
-																			num[0]=mensaje.msg[j+2];
-																			num[1]=mensaje.msg[j+3];
+																			num[0]=mensaje.msg[j+1];
+																			num[1]=mensaje.msg[j+2];
 																			inter_Enc.m.t.f.dia = atoi(num);
-																			num[0]=mensaje.msg[j+4];
-																			num[1]=mensaje.msg[j+5];
+																			num[0]=mensaje.msg[j+3];
+																			num[1]=mensaje.msg[j+4];
 																			inter_Enc.m.t.h.hora = atoi(num);
-																			num[0]=mensaje.msg[j+6];
-																			num[1]=mensaje.msg[j+7];
+																			num[0]=mensaje.msg[j+5];
+																			num[1]=mensaje.msg[j+6];
 																			inter_Enc.m.t.h.minuto = atoi(num);
 																			j=j+7;
 																			i=j;
@@ -178,13 +177,13 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 
 									                                        inter_Enc.m.tipo = CSAL_TP_M_SEMANA;
 									                                        num[0]=0;
-									                                        num[1]=mensaje.msg[j+2];
+									                                        num[1]=mensaje.msg[j+1];
 									                                        inter_Enc.m.t.s = atoi(num);
-									                                        num[0]=mensaje.msg[j+3];
-									                                        num[1]=mensaje.msg[j+4];
+									                                        num[0]=mensaje.msg[j+2];
+									                                        num[1]=mensaje.msg[j+3];
 									                                        inter_Enc.m.t.h.hora = atoi(num);
-									                                        num[0]=mensaje.msg[j+5];
-									                                        num[1]=mensaje.msg[j+6];
+									                                        num[0]=mensaje.msg[j+4];
+									                                        num[1]=mensaje.msg[j+5];
 									                                        inter_Enc.m.t.h.minuto = atoi(num);
 									                                        j=j+6;
 									                                        i=j;
@@ -193,11 +192,11 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 
 																	 	case'D':
 																	 		inter_Enc.m.tipo = CSAL_TP_M_DIA;
-																			num[0]=mensaje.msg[j+2];
-																			num[1]=mensaje.msg[j+3];
+																			num[0]=mensaje.msg[j+1];
+																			num[1]=mensaje.msg[j+2];
 																			inter_Enc.m.t.h.hora = atoi(num);
-																			num[0]=mensaje.msg[j+4];
-																			num[1]=mensaje.msg[j+5];
+																			num[0]=mensaje.msg[j+3];
+																			num[1]=mensaje.msg[j+4];
 																			inter_Enc.m.t.h.minuto = atoi(num);
 																			j=j+5;
 																			i=j;
@@ -205,8 +204,8 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 
 																		case 'H':
 																			inter_Enc.m.tipo = CSAL_TP_M_HORA;
-																			num[0]=mensaje.msg[j+2];
-																			num[1]=mensaje.msg[j+3];
+																			num[0]=mensaje.msg[j+1];
+																			num[1]=mensaje.msg[j+2];
 																			inter_Enc.m.t.h.minuto = atoi(num);
 																			j=j+3;
 																			i=j;
@@ -272,7 +271,7 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 
 															case 'F':
 																c_sal_mensaje.tipo=CSAL_TMSG_RTC ;
-																 inter_Apa.banderas  |=   CSAL_B_ON_MOMENTO;
+																 inter_Apa.banderas  |=   CSAL_B_OFF_MOMENTO;
 																 j=i+1;
 
 																 while(mensaje.msg[j]!=59){
@@ -282,17 +281,17 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 																		case 'A':
 
 																			inter_Apa.m.tipo = CSAL_TP_M_ANIO;
-																			num[0]=mensaje.msg[j+2];
-																			num[1]=mensaje.msg[j+3];
+																			num[0]=mensaje.msg[j+1];
+																			num[1]=mensaje.msg[j+2];
 																			inter_Apa.m.t.f.mes =atoi(num);
-																			num[0]=mensaje.msg[j+4];
-																			num[1]=mensaje.msg[j+5];
+																			num[0]=mensaje.msg[j+3];
+																			num[1]=mensaje.msg[j+4];
 																			inter_Apa.m.t.f.dia = atoi(num);
-																			num[0]=mensaje.msg[j+6];
-																			num[1]=mensaje.msg[j+7];
+																			num[0]=mensaje.msg[j+5];
+																			num[1]=mensaje.msg[j+6];
 																			inter_Apa.m.t.h.hora = atoi(num);
-																			num[0]=mensaje.msg[j+8];
-																			num[1]=mensaje.msg[j+9];
+																			num[0]=mensaje.msg[j+7];
+																			num[1]=mensaje.msg[j+8];
 																			inter_Apa.m.t.h.minuto = atoi(num);
 																			j=j+9;
 																			i=j;
@@ -301,14 +300,14 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 																		case 'M':
 
 																			inter_Apa.m.tipo = CSAL_TP_M_MES;
-																			num[0]=mensaje.msg[j+2];
-																			num[1]=mensaje.msg[j+3];
+																			num[0]=mensaje.msg[j+1];
+																			num[1]=mensaje.msg[j+2];
 																			inter_Apa.m.t.f.dia = atoi(num);
-																			num[0]=mensaje.msg[j+4];
-																			num[1]=mensaje.msg[j+5];
+																			num[0]=mensaje.msg[j+3];
+																			num[1]=mensaje.msg[j+4];
 																			inter_Apa.m.t.h.hora = atoi(num);
-																			num[0]=mensaje.msg[j+6];
-																			num[1]=mensaje.msg[j+7];
+																			num[0]=mensaje.msg[j+5];
+																			num[1]=mensaje.msg[j+6];
 																			inter_Apa.m.t.h.minuto = atoi(num);
 																			j=j+7;
 																			i=j;
@@ -318,13 +317,13 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 
 																			inter_Apa.m.tipo = CSAL_TP_M_SEMANA;
 																			num[0]=0;
-																			num[1]=mensaje.msg[j+2];
+																			num[1]=mensaje.msg[j+1];
 																			inter_Apa.m.t.s = atoi(num);
-																			num[0]=mensaje.msg[j+3];
-																			num[1]=mensaje.msg[j+4];
+																			num[0]=mensaje.msg[j+2];
+																			num[1]=mensaje.msg[j+3];
 																			inter_Apa.m.t.h.hora = atoi(num);
-																			num[0]=mensaje.msg[j+5];
-																			num[1]=mensaje.msg[j+6];
+																			num[0]=mensaje.msg[j+4];
+																			num[1]=mensaje.msg[j+5];
 																			inter_Apa.m.t.h.minuto = atoi(num);
 																			j=j+6;
 																			i=j;
@@ -332,19 +331,19 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 
 																		case 'D':
 																			inter_Apa.m.tipo = CSAL_TP_M_DIA;
-																			num[0]=mensaje.msg[j+2];
-																			num[1]=mensaje.msg[j+3];
+																			num[0]=mensaje.msg[j+1];
+																			num[1]=mensaje.msg[j+2];
 																			inter_Apa.m.t.h.hora = atoi(num);
-																			num[0]=mensaje.msg[j+4];
-																			num[1]=mensaje.msg[j+5];
+																			num[0]=mensaje.msg[j+3];
+																			num[1]=mensaje.msg[j+4];
 																			inter_Apa.m.t.h.minuto = atoi(num);
 																			j=j+5;
 																			i=j;
 																			break;
 																		case 'H':
 																			inter_Apa.m.tipo = CSAL_TP_M_HORA;
-																			num[0]=mensaje.msg[j+2];
-																			num[1]=mensaje.msg[j+3];
+																			num[0]=mensaje.msg[j+1];
+																			num[1]=mensaje.msg[j+2];
 																			inter_Apa.m.t.h.minuto = atoi(num);
 																			j=j+3;
 																			i=j;

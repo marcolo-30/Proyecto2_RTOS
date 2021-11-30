@@ -71,6 +71,10 @@ void RTC_Procese (RTC_Control *cRtcsp){
 			cRtcsp->TiempoRTC.h.segundo=0;
 			flag_dato=1;
 
+			c_sal_mensaje.tipo = CSAL_TMSG_RTC;
+			c_sal_mensaje.v.tiempo = cRtcsp->TiempoRTC;
+			CSal_Envie_mensaje(&c_salidas, &c_sal_mensaje, portMAX_DELAY);
+
 		}
 
 		//--------------------Minutos------------------------------------------
