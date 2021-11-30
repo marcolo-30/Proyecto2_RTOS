@@ -26,7 +26,7 @@ struct Salida
    unsigned short retardo; /* En segundos */
    };
 
-#define FACTOR_RETARDO        60
+#define FACTOR_RETARDO        1
 
 char CSal_Inicie (CSal_Control *cscp,
                   UBaseType_t prioridad)
@@ -158,23 +158,23 @@ void CSal_Procese (CSal_Control *cscp)
                         {
                         if (csp->on.e.retardo)
                            {
-                           unsigned short tmp = csp->on.e.retardo * FACTOR_RETARDO;
+                        		unsigned short tmp = csp->on.e.retardo * FACTOR_RETARDO;
                            
-                           if ( (sp->estado != SAL_E_ON_RETARDADO) || (tmp < sp->retardo) )
-                              sp->retardo = tmp;
-                           sp->estado = SAL_E_ON_RETARDADO;
-                           }
-                           else
-                           {
-                           if (csp->off.banderas & CSAL_B_OFF_RETARDO)
-                              {
-                              sp->estado = SAL_E_OFF_RETARDADO;
-                              sp->retardo = csp->off.retardo * FACTOR_RETARDO;
-                              }
-                              else
-                              sp->estado = SAL_E_ON;
-                           bits_on |= (1 << PIN_SALIDAS[i]);
-                           bits_on_mon |= (1 << i);
+							   if ( (sp->estado != SAL_E_ON_RETARDADO) || (tmp < sp->retardo) )
+								  sp->retardo = tmp;
+							   sp->estado = SAL_E_ON_RETARDADO;
+							   }
+					   else
+						   {
+							   if (csp->off.banderas & CSAL_B_OFF_RETARDO)
+								  {
+								  sp->estado = SAL_E_OFF_RETARDADO;
+								  sp->retardo = csp->off.retardo * FACTOR_RETARDO;
+								  }
+							   else
+						   sp->estado = SAL_E_ON;
+						   bits_on |= (1 << PIN_SALIDAS[i]);
+						   bits_on_mon |= (1 << i);
                            };
                         };
                      break;

@@ -166,12 +166,12 @@ void Interfaz_Procese (Interfaz_Control *iucp){
 																			min[1]=dato_hora[3];
 
 																			xSemaphoreTake(mutexRTC, portMAX_DELAY);
-																																					c_rtc.TiempoRTC.h.hora=atoi(hora);
+																			c_rtc.TiempoRTC.h.hora=atoi(hora);
 																			c_rtc.TiempoRTC.h.minuto=atoi(min);
 																			xSemaphoreGive(mutexRTC);
 
-																																						//envia la funcion de configuracion de fecha
-																																						break;
+																			//envia la funcion de configuracion de fecha
+																			break;
 																			//envia la funcion de configuracion de fecha
 																			break;
 																		}else if(dato_cola=='*'){
