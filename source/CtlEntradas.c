@@ -15,7 +15,7 @@ extern QueueHandle_t ColaAlarmas;
 
 #define LONG_STACK      (configMINIMAL_STACK_SIZE + 100)
 
-#define PERIODO_1SEG    400
+#define PERIODO_1SEG    1000
 
 uint32_t PIN_Entradas [8] = {2U,3U,6U,16U,17U,18U,19U,31U};
 
@@ -74,6 +74,7 @@ void CEnt_Procese (CEnt_Control *cesp)
    //anterior = PUERTO->PDIR; // Lectura de los puertos anterior 0000 0000
    anterior = readPort();
    tickactualA = xTaskGetTickCount();
+   const TickType_t one_second = PERIODO_1SEG/ portTICK_PERIOD_MS;
    while (SI)
       {
 //		if(state==0){
@@ -84,7 +85,7 @@ void CEnt_Procese (CEnt_Control *cesp)
 //			GPIO_WritePinOutput(GPIOE,BOARD_INITPINS_LED_RED_PIN,0);
 //			state=0;
 //		}
-      vTaskDelayUntil(&tickactualA, PERIODO_1SEG);
+      vTaskDelayUntil(&tickactualA, one_second);
  //     actual = PUERTO;
       //actual = PUERTO->PDIR; // lectura de los puertos actual 0000 0000
       actual = readPort();
@@ -97,9 +98,7 @@ void CEnt_Procese (CEnt_Control *cesp)
            ++cep, ++i, bit_mask <<= 1)
          {
     	   PUERTO->PDIR;
-    	 //  bits_maskSalida = 0x0000; // Nuevo
-    	   bits_maskSalida |= (1 << PIN_Entradas[i]);// Nuevo
-    	   //bits_maskSalida=bit_mask;
+
     	  if (cep->banderas & CENT_B_ACTIVO)
             {
             switch (cep->tipo)
@@ -131,10 +130,9 @@ void CEnt_Procese (CEnt_Control *cesp)
                   break;
                case CENT_TIPO_PULSO:
                   //if (anterior & bit_mask)
-            	   if (anterior & bits_maskSalida)
+            	   if (anterior & bit_mask)
                      { /* Estaba alto */
-                     //if (actual & bit_mask)
-            		   if (actual & bits_maskSalida)
+                     if (actual & bit_mask)
                         { /* Sigue alto => contin�a el pulso */
                         if (anchos[i])
                            --(anchos[i]);
@@ -153,7 +151,7 @@ void CEnt_Procese (CEnt_Control *cesp)
                      }
                      else
                      { /* Estaba bajo */
-                     if (actual & bits_maskSalida)
+                     if (actual & bit_mask)
                         /* Hubo borde de subida */
                         anchos[i] = cep->ancho;
                      };

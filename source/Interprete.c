@@ -88,7 +88,7 @@ void Interprete_Procese (Interprete_Control *interp_contp){
 									}
 
 									ancho_pulso=atoi(num_pulso);
-									CEnt_Configure_evento(&c_entrada,mensaje.msg[2]-48,mensaje.msg[3]-48,mensaje.msg[3], ancho_pulso );
+									CEnt_Configure_evento(&c_entrada,mensaje.msg[2]-48,mensaje.msg[3],mensaje.msg[3], ancho_pulso );
 								break;
 
 								case 'A':
